@@ -241,14 +241,32 @@ function getMeanings(name,rev,apiKey){
   return callClaude([{role:'user',content:'3 brief key meanings for '+name+' '+(rev?'reversed':'upright')+' in tarot. Comma-separated phrases only.'}],apiKey,120);
 }
 
-function getAllChoices(name,rev,allNames,apiKey){
+function getAllChoices(name,rev,allNames,apiKey,cachedMeanings){
+  // If we have a cached correct meaning, use it directly — no ambiguity
+  var cachedCard=cachedMeanings&&cachedMeanings[name];
+  var correctText=cachedCard?(rev?cachedCard.reversed:cachedCard.upright):'';
+  // Trim to first sentence if long
+  if(correctText&&correctText.length>80){
+    var firstStop=correctText.search(/[.!?]/);
+    if(firstStop>20)correctText=correctText.slice(0,firstStop+1);
+  }
+
   var pool=shuffle(allNames.filter(function(n){return n!==name;})).slice(0,6).join(', ');
-  return callClaude([{role:'user',content:'Tarot flashcard for '+name+' ('+(rev?'reversed':'upright')+'). Write 4 answer options — 1 correct, 3 wrong. Each must be 4-6 words. Same length and style. Return ONLY 4 options separated by | with CORRECT: prefix on the right one. Wrong answers use energy from: '+pool}],apiKey,200).then(function(t){
-    var parts=t.split('|').map(function(s){return s.trim();}).filter(Boolean);
-    var correct='',wrongs=[];
-    parts.forEach(function(p){if(p.indexOf('CORRECT:')===0){correct=p.replace('CORRECT:','').trim();}else{wrongs.push(p);}});
-    if(!correct){correct=parts[0]||'';wrongs=parts.slice(1);}
-    return{correct:correct,choices:shuffle([{text:correct,isCorrect:true}].concat(wrongs.slice(0,3).map(function(t){return{text:t,isCorrect:false};})))};
+
+  // If we have a correct answer, just ask for 3 wrong ones
+  if(correctText){
+    return callClaude([{role:'user',content:'Tarot quiz. The correct answer for '+name+' ('+(rev?'reversed':'upright')+') is: "'+correctText+'"\n\nWrite 3 WRONG answer options that are plausible but clearly different. Draw from these cards: '+pool+'\nReturn ONLY 3 options separated by |, nothing else. Match the length and style of the correct answer.'}],apiKey,150).then(function(t){
+      var wrongs=t.split('|').map(function(s){return s.trim();}).filter(Boolean).slice(0,3);
+      return{correct:correctText,choices:shuffle([{text:correctText,isCorrect:true}].concat(wrongs.map(function(w){return{text:w,isCorrect:false};})))};
+    });
+  }
+
+  // No cache — generate all 4 together with clearer format
+  return callClaude([{role:'user',content:'Tarot flashcard for '+name+' ('+(rev?'reversed':'upright')+').\nLine 1: CORRECT answer (4-8 words, key meaning)\nLines 2-4: WRONG answers (same length/style, plausible but wrong, from: '+pool+')\nReturn ONLY 4 lines, one per answer, no labels, no numbering.'}],apiKey,150).then(function(t){
+    var lines=t.split('\n').map(function(s){return s.trim();}).filter(Boolean).slice(0,4);
+    var correct=lines[0]||name;
+    var wrongs=lines.slice(1);
+    return{correct:correct,choices:shuffle([{text:correct,isCorrect:true}].concat(wrongs.map(function(w){return{text:w,isCorrect:false};})))};
   });
 }
 
@@ -506,7 +524,7 @@ function StudyTab(props){
   function start(orient){var q=buildQ(orient);setOrientation(orient);setQueue(q);setIdx(0);setFlipped(false);setMeaning('');setChoices([]);setAnswered(null);setScore({correct:0,total:0});setResultMsg('');setMode('fc');loadQ(q[0]);}
   function loadQ(card){
     setLoadingChoices(true);setChoices([]);
-    getAllChoices(card.name,card.isReversed,uploaded.map(function(c){return c.name;}),props.apiKey).then(function(res){setChoices(res.choices);setMeaning(res.correct);}).catch(function(err){console.error(err);}).then(function(){setLoadingChoices(false);});
+    getAllChoices(card.name,card.isReversed,uploaded.map(function(c){return c.name;}),props.apiKey,props.meanings).then(function(res){setChoices(res.choices);setMeaning(res.correct);}).catch(function(err){console.error(err);}).then(function(){setLoadingChoices(false);});
   }
   function flip(){setFlipped(true);if(!meaning&&!loadingMeaning){setLoadingMeaning(true);getMeanings(queue[idx].name,queue[idx].isReversed,props.apiKey).then(function(m){setMeaning(m);}).catch(function(){}).then(function(){setLoadingMeaning(false);});}}
   function answer(c){setAnswered(c);setScore(function(s){return{correct:s.correct+(c.isCorrect?1:0),total:s.total+1};});setResultMsg(c.isCorrect?'Well read.':'Not quite — flip to see the meaning.');if(!flipped&&c.isCorrect)setFlipped(true);}
@@ -597,7 +615,7 @@ function App(){
     e('div',{className:'nav'},[['today','Today'],['library','Library'],['study','Flashcards'],['details','Cards'],['spread','Spread']].map(function(tl){return e('button',{key:tl[0],className:'nbtn'+(tab===tl[0]?' active':''),onClick:function(){setTab(tl[0]);}},tl[1]);})),
     tab==='today'&&e(CardOfTheDayTab,{savedCards:savedCards,apiKey:apiKey,meanings:meanings}),
     tab==='library'&&e(LibraryTab,{savedCards:savedCards,showToast:showToast,onDelete:function(n){setSavedCards(function(p){var c=Object.assign({},p);delete c[n];return c;});}}),
-    tab==='study'&&e(StudyTab,{savedCards:savedCards,apiKey:apiKey}),
+    tab==='study'&&e(StudyTab,{savedCards:savedCards,apiKey:apiKey,meanings:meanings}),
     tab==='details'&&e(CardDetailsTab,{savedCards:savedCards,apiKey:apiKey,meanings:meanings}),
     tab==='spread'&&e(SpreadTab,{apiKey:apiKey}),
     e(Toast,{msg:toast})
