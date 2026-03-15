@@ -702,12 +702,12 @@ let apiKey = null;
 // ── Storage helpers ────────────────────────────────────────────────────────
 async function loadCards() {
   try {
-    const r = await window.storage.get(STORAGE_KEY);
-    return r ? JSON.parse(r.value) : {};
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
   } catch { return {}; }
 }
 async function persistCards() {
-  await window.storage.set(STORAGE_KEY, JSON.stringify(savedCards));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(savedCards));
 }
 
 // ── Image compression ──────────────────────────────────────────────────────
@@ -937,9 +937,9 @@ async function identifyCard(base64Image) {
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
     body: JSON.stringify({
-      model: 'claude-opus-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 100,
       messages: [{
         role: 'user',
