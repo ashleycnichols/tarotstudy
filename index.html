@@ -1,1113 +1,578 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Arcane Codex</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --ink: #1e1020;
-      --gold: #c9a84c;
-      --gold-light: #e8c96a;
-      --gold-dim: #a88840;
-      --crimson: #8b1a1a;
-      --maroon: #7a1f3d;
-      --purple: #6b3fa0;
-      --purple-light: #9b6fd4;
-      --purple-dim: #4a2870;
-      --text-main: #f0e6ff;
-      --text-dim: #c4a8e0;
-    }
-
-    body {
-      background-color: #1a0f24;
-      background-image:
-        radial-gradient(ellipse at 15% 15%, rgba(107,63,160,0.18) 0%, transparent 50%),
-        radial-gradient(ellipse at 85% 85%, rgba(122,31,61,0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(201,168,76,0.04) 0%, transparent 70%);
-      min-height: 100vh;
-      color: var(--text-main);
-      font-family: 'EB Garamond', serif;
-      font-size: 16px;
-    }
-
-    .app {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0 16px 80px;
-    }
-
-    /* Header */
-    .header {
-      text-align: center;
-      padding: 40px 0 32px;
-      position: relative;
-    }
-    .header::after {
-      content: '';
-      display: block;
-      height: 1px;
-      background: linear-gradient(to right, transparent, var(--gold), transparent);
-      margin-top: 24px;
-    }
-    .header-title {
-      font-family: 'Cinzel Decorative', cursive;
-      font-size: clamp(1.4rem, 5vw, 2.2rem);
-      color: var(--gold-light);
-      letter-spacing: 0.04em;
-      text-shadow: 0 0 40px rgba(201,168,76,0.4), 0 0 80px rgba(107,63,160,0.3);
-      line-height: 1.3;
-    }
-    .header-sub {
-      font-family: 'Cinzel', serif;
-      font-size: 0.75rem;
-      color: var(--purple-light);
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      margin-top: 8px;
-    }
-    .header-settings {
-      position: absolute;
-      top: 40px;
-      right: 0;
-      background: none;
-      border: 1px solid rgba(107,63,160,0.3);
-      border-radius: 50%;
-      width: 34px;
-      height: 34px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: var(--text-dim);
-      font-size: 0.9rem;
-      transition: all 0.2s;
-    }
-    .header-settings:hover { border-color: var(--purple-light); color: var(--gold-light); }
-
-    /* Nav */
-    .nav {
-      display: flex;
-      justify-content: center;
-      gap: 4px;
-      margin: 28px 0;
-      border: 1px solid rgba(107,63,160,0.3);
-      border-radius: 4px;
-      padding: 4px;
-      background: rgba(26,15,36,0.6);
-    }
-    .nav-btn {
-      flex: 1;
-      padding: 10px 12px;
-      background: none;
-      border: none;
-      color: var(--text-dim);
-      font-family: 'Cinzel', serif;
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      cursor: pointer;
-      border-radius: 2px;
-      transition: all 0.2s;
-    }
-    .nav-btn:hover { color: var(--gold-light); background: rgba(107,63,160,0.12); }
-    .nav-btn.active {
-      background: rgba(107,63,160,0.2);
-      color: var(--gold-light);
-      border: 1px solid rgba(201,168,76,0.35);
-    }
-
-    /* Progress */
-    .progress-wrap { margin-bottom: 28px; }
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 8px;
-    }
-    .progress-label .pl-title {
-      font-family: 'Cinzel', serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-    .progress-label .pl-count { font-size: 0.9rem; color: var(--gold); }
-    .progress-track {
-      height: 3px;
-      background: rgba(107,63,160,0.2);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(to right, var(--purple), var(--gold-light));
-      border-radius: 2px;
-      transition: width 0.6s ease;
-    }
-
-    /* Section title */
-    .section-title {
-      font-family: 'Cinzel', serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--purple-light);
-      margin-bottom: 14px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(107,63,160,0.25);
-    }
-
-    /* Buttons */
-    .btn {
-      padding: 10px 20px;
-      border-radius: 4px;
-      font-family: 'Cinzel', serif;
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: 1px solid;
-    }
-    .btn-primary {
-      background: rgba(201,168,76,0.12);
-      border-color: var(--gold);
-      color: var(--gold-light);
-    }
-    .btn-primary:hover { background: rgba(201,168,76,0.22); }
-    .btn-primary:disabled { opacity: 0.4; cursor: default; }
-    .btn-ghost {
-      background: none;
-      border-color: rgba(107,63,160,0.35);
-      color: var(--text-dim);
-    }
-    .btn-ghost:hover { border-color: var(--purple-light); color: var(--text-main); }
-
-    /* Upload zone */
-    .upload-zone {
-      border: 1px dashed rgba(107,63,160,0.5);
-      border-radius: 6px;
-      padding: 36px 20px;
-      text-align: center;
-      background: rgba(107,63,160,0.06);
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-bottom: 28px;
-      position: relative;
-    }
-    .upload-zone:hover, .upload-zone.drag-over {
-      border-color: var(--purple-light);
-      background: rgba(107,63,160,0.12);
-    }
-
-    .upload-icon { font-size: 2rem; margin-bottom: 12px; }
-    .upload-main {
-      font-family: 'Cinzel', serif;
-      font-size: 0.85rem;
-      color: var(--gold);
-      letter-spacing: 0.08em;
-      margin-bottom: 6px;
-    }
-    .upload-sub { font-size: 0.82rem; color: var(--text-dim); font-style: italic; }
-
-    /* Pending grid */
-    .pending-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 10px;
-      margin-bottom: 28px;
-    }
-    .pending-card {
-      position: relative;
-      aspect-ratio: 2/3;
-      border-radius: 4px;
-      overflow: hidden;
-      border: 1px solid rgba(201,168,76,0.2);
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .pending-card:hover { border-color: var(--gold); }
-    .pending-card.assigned { border-color: var(--maroon); }
-    .pending-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .pending-card-label {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(26,15,36,0.9);
-      font-size: 0.6rem;
-      font-family: 'Cinzel', serif;
-      color: var(--gold-light);
-      padding: 4px 5px;
-      text-align: center;
-      line-height: 1.3;
-    }
-    .pending-card-remove {
-      position: absolute;
-      top: 4px; right: 4px;
-      width: 18px; height: 18px;
-      background: rgba(139,26,26,0.85);
-      border: none;
-      border-radius: 50%;
-      color: #fff;
-      font-size: 0.65rem;
-      cursor: pointer;
-      align-items: center;
-      justify-content: center;
-      display: none;
-      line-height: 1;
-    }
-    .pending-card:hover .pending-card-remove { display: flex; }
-
-    /* Modal */
-    .modal-backdrop {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.8);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 100;
-      padding: 20px;
-    }
-    .modal-backdrop.hidden { display: none; }
-    .modal {
-      background: #241535;
-      border: 1px solid rgba(107,63,160,0.45);
-      border-radius: 8px;
-      padding: 28px;
-      width: 100%;
-      max-width: 480px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    .modal-title {
-      font-family: 'Cinzel', serif;
-      font-size: 0.8rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 16px;
-    }
-    .modal-img {
-      width: 100%;
-      max-height: 200px;
-      object-fit: contain;
-      border-radius: 4px;
-      margin-bottom: 20px;
-      border: 1px solid rgba(201,168,76,0.15);
-    }
-    .card-search {
-      width: 100%;
-      background: rgba(0,0,0,0.35);
-      border: 1px solid rgba(107,63,160,0.4);
-      border-radius: 4px;
-      padding: 10px 14px;
-      color: var(--text-main);
-      font-family: 'EB Garamond', serif;
-      font-size: 1rem;
-      margin-bottom: 12px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .card-search:focus { border-color: var(--purple-light); }
-    .card-search::placeholder { color: var(--text-dim); }
-    .card-list {
-      max-height: 220px;
-      overflow-y: auto;
-      border: 1px solid rgba(107,63,160,0.25);
-      border-radius: 4px;
-      margin-bottom: 16px;
-    }
-    .card-list-item {
-      padding: 9px 14px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      border-bottom: 1px solid rgba(107,63,160,0.12);
-      transition: background 0.15s;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .card-list-item:hover { background: rgba(107,63,160,0.15); }
-    .card-list-item.taken { opacity: 0.4; pointer-events: none; }
-    .card-list-item .card-suit { font-size: 0.7rem; color: var(--purple-light); font-style: italic; }
-    .modal-actions { display: flex; gap: 10px; }
-
-    /* Library */
-    .library-filters {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    .filter-chip {
-      padding: 5px 14px;
-      border-radius: 20px;
-      font-family: 'Cinzel', serif;
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      cursor: pointer;
-      border: 1px solid rgba(107,63,160,0.3);
-      color: var(--text-dim);
-      background: none;
-      transition: all 0.2s;
-    }
-    .filter-chip:hover { border-color: var(--purple-light); color: var(--text-main); }
-    .filter-chip.active { background: rgba(107,63,160,0.2); border-color: var(--purple-light); color: var(--gold-light); }
-
-    .library-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-      gap: 10px;
-    }
-    .lib-card {
-      position: relative;
-      aspect-ratio: 2/3;
-      border-radius: 5px;
-      overflow: hidden;
-      border: 1px solid rgba(107,63,160,0.2);
-      cursor: pointer;
-      transition: all 0.2s;
-      background: rgba(107,63,160,0.05);
-    }
-    .lib-card:hover { border-color: var(--purple-light); transform: translateY(-2px); }
-    .lib-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .lib-card-empty {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      padding: 8px;
-      gap: 6px;
-    }
-    .lib-card-empty-icon { font-size: 1.2rem; opacity: 0.3; }
-    .lib-card-name {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      background: linear-gradient(transparent, rgba(26,15,36,0.92));
-      font-size: 0.58rem;
-      font-family: 'Cinzel', serif;
-      color: var(--gold-light);
-      padding: 16px 5px 5px;
-      text-align: center;
-      line-height: 1.3;
-    }
-    .lib-card-name-empty {
-      font-family: 'Cinzel', serif;
-      font-size: 0.58rem;
-      color: var(--text-dim);
-      text-align: center;
-      line-height: 1.3;
-      opacity: 0.5;
-    }
-
-    /* Study placeholder */
-    .study-placeholder {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-dim);
-    }
-    .study-placeholder-icon { font-size: 3rem; margin-bottom: 20px; opacity: 0.4; }
-    .study-placeholder h3 {
-      font-family: 'Cinzel', serif;
-      font-size: 1rem;
-      color: var(--gold);
-      margin-bottom: 10px;
-      letter-spacing: 0.1em;
-    }
-    .study-placeholder p { font-style: italic; font-size: 0.95rem; line-height: 1.6; }
-
-    /* Onboarding */
-    .onboard {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 24px;
-      text-align: center;
-    }
-    .onboard-sigil { font-size: 3.5rem; margin-bottom: 28px; filter: drop-shadow(0 0 20px rgba(107,63,160,0.6)); }
-    .onboard-title {
-      font-family: 'Cinzel Decorative', cursive;
-      font-size: clamp(1.3rem, 5vw, 2rem);
-      color: var(--gold-light);
-      letter-spacing: 0.04em;
-      text-shadow: 0 0 40px rgba(201,168,76,0.4), 0 0 80px rgba(107,63,160,0.3);
-      margin-bottom: 12px;
-      line-height: 1.3;
-    }
-    .onboard-sub {
-      font-family: 'Cinzel', serif;
-      font-size: 0.72rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--purple-light);
-      margin-bottom: 36px;
-    }
-    .onboard-card {
-      width: 100%;
-      max-width: 420px;
-      background: rgba(36,21,53,0.8);
-      border: 1px solid rgba(107,63,160,0.35);
-      border-radius: 10px;
-      padding: 32px 28px;
-      text-align: left;
-    }
-    .onboard-label {
-      font-family: 'Cinzel', serif;
-      font-size: 0.68rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--purple-light);
-      margin-bottom: 10px;
-      display: block;
-    }
-    .onboard-desc {
-      font-size: 0.88rem;
-      color: var(--text-dim);
-      font-style: italic;
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-    .onboard-input, .settings-input {
-      width: 100%;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(107,63,160,0.4);
-      border-radius: 4px;
-      padding: 12px 14px;
-      color: var(--text-main);
-      font-family: 'EB Garamond', serif;
-      font-size: 1rem;
-      margin-bottom: 16px;
-      outline: none;
-      transition: border-color 0.2s;
-      letter-spacing: 0.05em;
-    }
-    .onboard-input:focus, .settings-input:focus { border-color: var(--purple-light); }
-    .onboard-input::placeholder, .settings-input::placeholder { color: rgba(196,168,224,0.35); letter-spacing: 0; }
-    .onboard-error { color: #c97070; font-size: 0.82rem; margin-bottom: 12px; font-style: italic; }
-    .onboard-hint { font-size: 0.78rem; color: var(--text-dim); margin-top: 14px; line-height: 1.5; opacity: 0.7; }
-    .onboard-hint a { color: var(--purple-light); }
-
-    /* Settings panel */
-    .settings-panel {
-      background: rgba(36,21,53,0.95);
-      border: 1px solid rgba(107,63,160,0.4);
-      border-radius: 8px;
-      padding: 24px;
-      margin-bottom: 28px;
-    }
-    .settings-row { display: flex; align-items: center; gap: 10px; }
-    .settings-input { flex: 1; margin-bottom: 0; }
-    .key-status { font-size: 0.75rem; font-style: italic; color: var(--text-dim); margin-top: 10px; }
-    .key-status.ok { color: #7abf7a; }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(36,21,53,0.97);
-      border: 1px solid var(--purple-light);
-      border-radius: 4px;
-      padding: 10px 20px;
-      font-family: 'Cinzel', serif;
-      font-size: 0.72rem;
-      letter-spacing: 0.1em;
-      color: var(--gold-light);
-      z-index: 200;
-      animation: fadeInUp 0.3s ease;
-      white-space: nowrap;
-    }
-    .toast.hidden { display: none; }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-    }
-
-    /* Scanning state on pending card */
-    .pending-card .scan-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(26,15,36,0.75);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    .scan-spinner {
-      width: 20px; height: 20px;
-      border: 2px solid rgba(155,111,212,0.3);
-      border-top-color: var(--purple-light);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .scan-label-text {
-      font-family: 'Cinzel', serif;
-      font-size: 0.55rem;
-      color: var(--purple-light);
-      letter-spacing: 0.1em;
-    }
-    .pending-card.scanning { pointer-events: none; }
-    .pending-card.error { border-color: #c97070; }
-
-    /* Hidden utility */
-    .hidden { display: none !important; }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-    ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 3px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" content="#1a0f24" />
+<title>The Arcane Codex</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#c9a84c;--gold-light:#e8c96a;--maroon:#7a1f3d;--purple:#6b3fa0;--purple-light:#9b6fd4;--text-main:#f0e6ff;--text-dim:#c4a8e0;--bg:#1a0f24;--bg2:#241535;}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 15%,rgba(107,63,160,.18) 0%,transparent 50%),radial-gradient(ellipse at 85% 85%,rgba(122,31,61,.15) 0%,transparent 50%);color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:16px;min-height:100vh}
+.app{max-width:900px;margin:0 auto;padding:0 16px 80px}
+.header{text-align:center;padding:32px 0 24px;position:relative}
+.header::after{content:'';display:block;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin-top:20px}
+.htitle{font-family:'Cinzel Decorative','Palatino Linotype',serif;font-size:clamp(1.3rem,4vw,2rem);color:var(--gold-light);letter-spacing:.04em;text-shadow:0 0 40px rgba(201,168,76,.4),0 0 80px rgba(107,63,160,.3);line-height:1.3}
+.hsub{font-family:'Cinzel','Palatino Linotype',serif;font-size:.72rem;color:var(--purple-light);letter-spacing:.25em;text-transform:uppercase;margin-top:8px}
+.hset{position:absolute;top:32px;right:0;background:none;border:1px solid rgba(107,63,160,.3);border-radius:50%;width:32px;height:32px;cursor:pointer;color:var(--text-dim);font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.hset:hover{border-color:var(--purple-light);color:var(--gold-light)}
+.nav{display:flex;gap:4px;margin:24px 0;border:1px solid rgba(107,63,160,.3);border-radius:4px;padding:4px;background:rgba(26,15,36,.6)}
+.nbtn{flex:1;padding:9px 6px;background:none;border:none;color:var(--text-dim);font-family:'Cinzel','Palatino Linotype',serif;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
+.nbtn:hover{color:var(--gold-light);background:rgba(107,63,160,.12)}
+.nbtn.active{background:rgba(107,63,160,.2);color:var(--gold-light);border:1px solid rgba(201,168,76,.35)}
+.prog-wrap{margin-bottom:24px}
+.prog-lbl{display:flex;justify-content:space-between;margin-bottom:8px}
+.prog-lbl .pt{font-family:'Cinzel','Palatino Linotype',serif;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim)}
+.prog-lbl .pc{font-size:.9rem;color:var(--gold)}
+.prog-track{height:3px;background:rgba(107,63,160,.2);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(to right,var(--purple),var(--gold-light));border-radius:2px;transition:width .6s ease}
+.sec-title{font-family:'Cinzel','Palatino Linotype',serif;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--purple-light);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(107,63,160,.25)}
+.btn{padding:9px 18px;border-radius:4px;font-family:'Cinzel','Palatino Linotype',serif;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s;border:1px solid}
+.btn-p{background:rgba(201,168,76,.12);border-color:var(--gold);color:var(--gold-light)}
+.btn-p:hover{background:rgba(201,168,76,.22)}
+.btn-p:disabled{opacity:.4;cursor:default}
+.btn-g{background:none;border-color:rgba(107,63,160,.35);color:var(--text-dim)}
+.btn-g:hover{border-color:var(--purple-light);color:var(--text-main)}
+.upload-zone{border:1px dashed rgba(107,63,160,.5);border-radius:6px;padding:32px 20px;text-align:center;background:rgba(107,63,160,.06);transition:all .2s;margin-bottom:24px}
+.upload-zone.drag,.upload-zone:hover{border-color:var(--purple-light);background:rgba(107,63,160,.12)}
+.uicon{font-size:1.8rem;margin-bottom:10px}
+.umain{font-family:'Cinzel','Palatino Linotype',serif;font-size:.82rem;color:var(--gold);letter-spacing:.08em;margin-bottom:6px}
+.usub{font-size:.8rem;color:var(--text-dim);font-style:italic;margin-bottom:14px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:10px;margin-bottom:24px}
+.pcard{position:relative;aspect-ratio:2/3;border-radius:4px;overflow:hidden;border:1px solid rgba(201,168,76,.2);cursor:pointer;transition:border-color .2s}
+.pcard:hover{border-color:var(--gold)}.pcard.assigned{border-color:var(--maroon)}.pcard.scanning{border-color:rgba(155,111,212,.5);pointer-events:none}.pcard.err{border-color:#c97070}
+.pcard img{width:100%;height:100%;object-fit:cover;display:block}
+.pcard-lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(26,15,36,.9);font-size:.58rem;font-family:'Cinzel','Palatino Linotype',serif;color:var(--gold-light);padding:4px 5px;text-align:center;line-height:1.3}
+.pcard-rm{position:absolute;top:4px;right:4px;width:18px;height:18px;background:rgba(139,26,26,.85);border:none;border-radius:50%;color:#fff;font-size:.6rem;cursor:pointer;display:none;align-items:center;justify-content:center}
+.pcard:hover .pcard-rm{display:flex}
+.scan-ov{position:absolute;inset:0;background:rgba(26,15,36,.75);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.spinner{width:18px;height:18px;border:2px solid rgba(155,111,212,.3);border-top-color:var(--purple-light);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.slbl{font-family:'Cinzel','Palatino Linotype',serif;font-size:.52rem;color:var(--purple-light);letter-spacing:.1em}
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal{background:var(--bg2);border:1px solid rgba(107,63,160,.45);border-radius:8px;padding:24px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto}
+.modal-title{font-family:'Cinzel','Palatino Linotype',serif;font-size:.76rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.modal-img{width:100%;max-height:180px;object-fit:contain;border-radius:4px;margin-bottom:16px;border:1px solid rgba(201,168,76,.15)}
+.csearch{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(107,63,160,.4);border-radius:4px;padding:9px 12px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:1rem;margin-bottom:10px;outline:none;transition:border-color .2s}
+.csearch:focus{border-color:var(--purple-light)}.csearch::placeholder{color:var(--text-dim)}
+.clist{max-height:200px;overflow-y:auto;border:1px solid rgba(107,63,160,.25);border-radius:4px;margin-bottom:14px}
+.citem{padding:8px 12px;cursor:pointer;font-size:.88rem;border-bottom:1px solid rgba(107,63,160,.1);transition:background .15s;display:flex;justify-content:space-between;align-items:center}
+.citem:hover{background:rgba(107,63,160,.15)}.citem.taken{opacity:.4;pointer-events:none}
+.csuit{font-size:.68rem;color:var(--purple-light);font-style:italic}
+.lib-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.fchip{padding:4px 12px;border-radius:20px;font-family:'Cinzel','Palatino Linotype',serif;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:1px solid rgba(107,63,160,.3);color:var(--text-dim);background:none;transition:all .2s}
+.fchip:hover{border-color:var(--purple-light);color:var(--text-main)}.fchip.active{background:rgba(107,63,160,.2);border-color:var(--purple-light);color:var(--gold-light)}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:8px}
+.lcard{position:relative;aspect-ratio:2/3;border-radius:5px;overflow:hidden;border:1px solid rgba(107,63,160,.2);cursor:pointer;transition:all .2s;background:rgba(107,63,160,.05)}
+.lcard:hover{border-color:var(--purple-light);transform:translateY(-2px)}
+.lcard img{width:100%;height:100%;object-fit:cover;display:block}
+.lcard-name{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(26,15,36,.92));font-size:.55rem;font-family:'Cinzel','Palatino Linotype',serif;color:var(--gold-light);padding:14px 4px 4px;text-align:center;line-height:1.3}
+.lcard-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:6px;gap:4px}
+.le-icon{font-size:1rem;opacity:.25}.le-name{font-family:'Cinzel','Palatino Linotype',serif;font-size:.54rem;color:var(--text-dim);text-align:center;line-height:1.3;opacity:.5}
+.set-panel{background:rgba(36,21,53,.95);border:1px solid rgba(107,63,160,.4);border-radius:8px;padding:20px;margin-bottom:24px}
+.set-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.set-inp{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(107,63,160,.4);border-radius:4px;padding:9px 12px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:.95rem;outline:none;transition:border-color .2s}
+.kstatus{font-size:.74rem;font-style:italic;color:#7abf7a;margin-top:8px}
+.onboard{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center}
+.osigil{font-size:3rem;margin-bottom:24px}.otitle{font-family:'Cinzel Decorative','Palatino Linotype',serif;font-size:clamp(1.2rem,4vw,1.8rem);color:var(--gold-light);letter-spacing:.04em;text-shadow:0 0 40px rgba(201,168,76,.4);margin-bottom:10px;line-height:1.3}
+.osub{font-family:'Cinzel','Palatino Linotype',serif;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--purple-light);margin-bottom:32px}
+.ocard{width:100%;max-width:400px;background:rgba(36,21,53,.8);border:1px solid rgba(107,63,160,.35);border-radius:10px;padding:28px 24px;text-align:left}
+.olabel{font-family:'Cinzel','Palatino Linotype',serif;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--purple-light);margin-bottom:8px;display:block}
+.odesc{font-size:.86rem;color:var(--text-dim);font-style:italic;line-height:1.6;margin-bottom:16px}
+.oinput{width:100%;background:rgba(0,0,0,.4);border:1px solid rgba(107,63,160,.4);border-radius:4px;padding:11px 13px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:1rem;margin-bottom:14px;outline:none;transition:border-color .2s;letter-spacing:.04em}
+.oinput:focus{border-color:var(--purple-light)}.oinput::placeholder{color:rgba(196,168,224,.3);letter-spacing:0}
+.oerr{color:#c97070;font-size:.8rem;margin-bottom:10px;font-style:italic}
+.ohint{font-size:.76rem;color:var(--text-dim);margin-top:12px;line-height:1.5;opacity:.7}.ohint a{color:var(--purple-light)}
+.loading{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.loading .spinner{width:28px;height:28px;border-width:3px}
+.loading p{font-family:'Cinzel','Palatino Linotype',serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--purple-light)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(36,21,53,.97);border:1px solid var(--purple-light);border-radius:4px;padding:9px 18px;font-family:'Cinzel','Palatino Linotype',serif;font-size:.68rem;letter-spacing:.1em;color:var(--gold-light);z-index:200;animation:fup .3s ease;white-space:nowrap}
+@keyframes fup{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.study-select{display:flex;flex-direction:column;align-items:center;padding:32px 16px;gap:20px}
+.study-select h2{font-family:'Cinzel','Palatino Linotype',serif;font-size:1rem;color:var(--gold);letter-spacing:.15em;text-transform:uppercase}
+.mode-cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:480px}
+.mode-card{background:rgba(36,21,53,.7);border:1px solid rgba(107,63,160,.3);border-radius:8px;padding:20px 22px;cursor:pointer;transition:all .2s;text-align:left}
+.mode-card:hover{border-color:var(--gold);background:rgba(107,63,160,.15)}
+.mode-card h3{font-family:'Cinzel','Palatino Linotype',serif;font-size:.85rem;color:var(--gold-light);letter-spacing:.1em;margin-bottom:6px}
+.mode-card p{font-size:.85rem;color:var(--text-dim);font-style:italic;line-height:1.5}
+.mode-icon{font-size:1.4rem;margin-bottom:10px}
+.fc-wrap{display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:20px}
+.fc-meta{font-family:'Cinzel','Palatino Linotype',serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--purple-light);text-align:center}
+.fc-card-wrap{width:100%;max-width:280px;perspective:1000px}
+.fc-card{width:100%;aspect-ratio:2/3;position:relative;transform-style:preserve-3d;transition:transform .55s ease;cursor:pointer;border-radius:10px}
+.fc-card.flipped{transform:rotateY(180deg)}
+.fc-face{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;overflow:hidden;border:1px solid rgba(107,63,160,.3)}
+.fc-front{background:var(--bg2)}.fc-back{transform:rotateY(180deg);background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;gap:12px}
+.fc-front img{width:100%;height:100%;object-fit:cover;display:block;border-radius:10px}
+.fc-front.inverted img{transform:rotate(180deg)}
+.fc-orientation{position:absolute;top:8px;left:0;right:0;text-align:center;font-family:'Cinzel','Palatino Linotype',serif;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--purple-light);background:rgba(26,15,36,.75);padding:4px 0;pointer-events:none}
+.fc-tap-hint{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-family:'Cinzel','Palatino Linotype',serif;font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(196,168,224,.5)}
+.fc-back-name{font-family:'Cinzel Decorative','Palatino Linotype',serif;font-size:1rem;color:var(--gold-light);line-height:1.3}
+.fc-back-orient{font-family:'Cinzel','Palatino Linotype',serif;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--purple-light)}
+.fc-back-meaning{font-size:.88rem;color:var(--text-dim);font-style:italic;line-height:1.6}
+.fc-loading{display:flex;align-items:center;gap:8px;font-family:'Cinzel','Palatino Linotype',serif;font-size:.65rem;color:var(--text-dim);letter-spacing:.1em}
+.fc-choices{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px}
+.fc-choice{background:rgba(36,21,53,.6);border:1px solid rgba(107,63,160,.25);border-radius:6px;padding:12px 16px;cursor:pointer;transition:all .2s;font-size:.9rem;color:var(--text-main);text-align:left;font-family:'EB Garamond',Georgia,serif}
+.fc-choice:hover{border-color:var(--purple-light);background:rgba(107,63,160,.15)}
+.fc-choice.correct{border-color:#7abf7a;background:rgba(122,191,122,.1);color:#7abf7a;pointer-events:none}
+.fc-choice.wrong{border-color:#c97070;background:rgba(201,112,112,.1);color:#c97070;pointer-events:none}
+.fc-choice.reveal{border-color:#7abf7a;background:rgba(122,191,122,.08);color:#7abf7a;pointer-events:none}
+.fc-result{text-align:center;font-family:'Cinzel','Palatino Linotype',serif;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;padding:6px 0}
+.fc-result.good{color:#7abf7a}.fc-result.bad{color:#c97070}
+.fc-actions{display:flex;gap:10px;width:100%;max-width:420px;justify-content:center}
+.fc-score{font-family:'Cinzel','Palatino Linotype',serif;font-size:.72rem;color:var(--text-dim);letter-spacing:.1em;text-align:center}
+.fc-score span{color:var(--gold)}
+.interp-wrap{display:flex;flex-direction:column;gap:20px;max-width:600px;margin:0 auto;padding:16px 0}
+.interp-card-row{display:flex;gap:16px;align-items:flex-start}
+.interp-thumb{width:110px;flex-shrink:0;aspect-ratio:2/3;border-radius:6px;overflow:hidden;border:1px solid rgba(107,63,160,.3)}
+.interp-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.interp-thumb.inverted img{transform:rotate(180deg)}
+.interp-card-info{flex:1}
+.interp-card-name{font-family:'Cinzel Decorative','Palatino Linotype',serif;font-size:1.1rem;color:var(--gold-light);margin-bottom:4px}
+.interp-card-orient{font-family:'Cinzel','Palatino Linotype',serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--purple-light);margin-bottom:12px}
+.orient-toggle{display:flex;gap:8px}
+.otoggle-btn{padding:5px 14px;border-radius:20px;font-family:'Cinzel','Palatino Linotype',serif;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:1px solid rgba(107,63,160,.3);color:var(--text-dim);background:none;transition:all .2s}
+.otoggle-btn.active{background:rgba(107,63,160,.2);border-color:var(--purple-light);color:var(--gold-light)}
+.interp-textarea{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(107,63,160,.35);border-radius:6px;padding:12px 14px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:1rem;line-height:1.6;resize:vertical;min-height:110px;outline:none;transition:border-color .2s}
+.interp-textarea:focus{border-color:var(--purple-light)}.interp-textarea::placeholder{color:var(--text-dim);font-style:italic}
+.feedback-box{background:rgba(36,21,53,.7);border:1px solid rgba(107,63,160,.3);border-radius:8px;padding:20px;line-height:1.7;font-size:.95rem}
+.feedback-box h4{font-family:'Cinzel','Palatino Linotype',serif;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.feedback-section{margin-bottom:16px}.feedback-section:last-child{margin-bottom:0}
+.fb-label{font-family:'Cinzel','Palatino Linotype',serif;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--purple-light);margin-bottom:6px}
+.fb-text{color:var(--text-dim);font-style:italic;line-height:1.7}
+.pick-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:8px;max-height:320px;overflow-y:auto}
+.pick-card{position:relative;aspect-ratio:2/3;border-radius:5px;overflow:hidden;border:1px solid rgba(107,63,160,.2);cursor:pointer;transition:all .2s;background:rgba(107,63,160,.05)}
+.pick-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.pick-card img{width:100%;height:100%;object-fit:cover;display:block}
+.pick-card-name{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(26,15,36,.92));font-size:.54rem;font-family:'Cinzel','Palatino Linotype',serif;color:var(--gold-light);padding:12px 3px 4px;text-align:center;line-height:1.2}
+.spread-wrap{display:flex;flex-direction:column;gap:20px;padding:16px 0}
+.spread-img-preview{width:100%;max-height:280px;object-fit:contain;border-radius:8px;border:1px solid rgba(107,63,160,.3);display:block}
+.spread-textarea{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(107,63,160,.35);border-radius:6px;padding:12px 14px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:1rem;line-height:1.6;resize:vertical;min-height:130px;outline:none;transition:border-color .2s}
+.spread-textarea:focus{border-color:var(--purple-light)}.spread-textarea::placeholder{color:var(--text-dim);font-style:italic}
+.context-input{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(107,63,160,.35);border-radius:6px;padding:10px 14px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:.95rem;outline:none;transition:border-color .2s}
+.context-input:focus{border-color:var(--purple-light)}.context-input::placeholder{color:var(--text-dim);font-style:italic}
+.sph{text-align:center;padding:50px 20px;color:var(--text-dim)}
+.sph-icon{font-size:2.5rem;margin-bottom:16px;opacity:.35}
+.sph h3{font-family:'Cinzel','Palatino Linotype',serif;font-size:.95rem;color:var(--gold);margin-bottom:8px;letter-spacing:.1em}
+.sph p{font-style:italic;font-size:.9rem;line-height:1.6}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:rgba(0,0,0,.2)}::-webkit-scrollbar-thumb{background:rgba(201,168,76,.3);border-radius:3px}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 </head>
 <body>
-
-<!-- ONBOARDING SCREEN -->
-<div id="screen-onboard" class="onboard">
-  <div class="onboard-sigil">✦</div>
-  <div class="onboard-title">The Arcane Codex</div>
-  <div class="onboard-sub">Tarot Study Companion</div>
-  <div class="onboard-card">
-    <label class="onboard-label">Your Anthropic API Key</label>
-    <p class="onboard-desc">Paste your Claude API key below. It stays on this device only, never sent anywhere except directly to Anthropic when you study.</p>
-    <input id="onboard-key-input" class="onboard-input" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false" />
-    <div id="onboard-error" class="onboard-error hidden"></div>
-    <button id="onboard-submit" class="btn btn-primary" style="width:100%">Enter the Codex</button>
-    <div class="onboard-hint">
-      Get a key at <a href="https://console.anthropic.com" target="_blank" rel="noreferrer">console.anthropic.com</a> → API Keys. You'll need to do this once per device.
-    </div>
-  </div>
-</div>
-
-<!-- MAIN APP -->
-<div id="screen-app" class="app hidden">
-  <div class="header">
-    <div class="header-title">The Arcane Codex</div>
-    <div class="header-sub">Tarot Study Companion</div>
-    <button id="settings-toggle" class="header-settings" title="API Key Settings">⚙</button>
-  </div>
-
-  <!-- Settings panel -->
-  <div id="settings-panel" class="settings-panel hidden">
-    <div class="section-title" style="margin-bottom:16px">API Key Settings</div>
-    <div id="key-status" class="key-status ok" style="margin-bottom:14px"></div>
-    <div class="settings-row">
-      <input id="settings-key-input" class="settings-input" type="password" placeholder="Paste new key to replace..." autocomplete="off" spellcheck="false" />
-      <button id="settings-update" class="btn btn-primary">Update</button>
-      <button id="settings-close" class="btn btn-ghost">Close</button>
-    </div>
-    <div id="settings-saved" class="key-status ok hidden" style="margin-top:10px">✓ Key updated</div>
-  </div>
-
-  <!-- Progress -->
-  <div class="progress-wrap">
-    <div class="progress-label">
-      <span class="pl-title">Deck Completion</span>
-      <span class="pl-count" id="progress-count">0 / 78</span>
-    </div>
-    <div class="progress-track">
-      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
-    </div>
-  </div>
-
-  <!-- Nav -->
-  <div class="nav">
-    <button class="nav-btn active" data-tab="upload">Upload</button>
-    <button class="nav-btn" data-tab="library">Library</button>
-    <button class="nav-btn" data-tab="study">Study</button>
-  </div>
-
-  <!-- Upload Tab -->
-  <!-- Hidden file input, triggered explicitly -->
-  <input type="file" id="file-input" accept="image/*" multiple style="display:none" />
-
-  <div id="tab-upload">
-    <div class="upload-zone" id="upload-zone">
-      <div class="upload-icon">✦</div>
-      <div class="upload-main">Upload card images</div>
-      <div class="upload-sub">Tap the button below or drag and drop</div>
-      <button class="btn btn-primary" id="upload-btn" style="margin-top:16px">Choose Photos</button>
-    </div>
-    <div id="pending-section" class="hidden">
-      <div class="section-title" id="pending-title"></div>
-      <div class="pending-grid" id="pending-grid"></div>
-      <button id="save-btn" class="btn btn-primary" style="width:100%" disabled>Save cards to deck</button>
-    </div>
-  </div>
-
-  <!-- Library Tab -->
-  <div id="tab-library" class="hidden">
-    <div class="library-filters" id="library-filters"></div>
-    <div class="library-grid" id="library-grid"></div>
-  </div>
-
-  <!-- Study Tab -->
-  <div id="tab-study" class="hidden">
-    <div class="study-placeholder" id="study-content">
-      <div class="study-placeholder-icon">☽</div>
-      <h3>Your deck awaits</h3>
-      <p>Upload your cards first to begin your studies.<br>Visit the Upload tab to add cards to your deck.</p>
-    </div>
-  </div>
-</div>
-
-<!-- Assignment Modal -->
-<div id="assign-modal" class="modal-backdrop hidden">
-  <div class="modal">
-    <div class="modal-title">Which card is this?</div>
-    <img id="modal-img" class="modal-img" src="" alt="" />
-    <input id="modal-search" class="card-search" placeholder="Search cards..." autocomplete="off" />
-    <div class="card-list" id="modal-card-list"></div>
-    <div class="modal-actions">
-      <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div id="toast" class="toast hidden"></div>
-
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script>
-const STORAGE_KEY = 'tarot-learner-cards';
-const API_KEY_KEY  = 'tarot-learner-apikey';
+const {useState,useEffect,useCallback,useRef,useMemo}=React;
+const API_KEY_KEY='tarot-learner-apikey';
+const CARD_PREFIX='tarot-card:';
+const MAJOR=["The Fool","The Magician","The High Priestess","The Empress","The Emperor","The Hierophant","The Lovers","The Chariot","Strength","The Hermit","Wheel of Fortune","Justice","The Hanged Man","Death","Temperance","The Devil","The Tower","The Star","The Moon","The Sun","Judgement","The World"];
+const SUITS=["Wands","Cups","Swords","Pentacles"];
+const RANKS=["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Page","Knight","Queen","King"];
+const ALL_CARDS=[...MAJOR.map(n=>({name:n,suit:"Major Arcana",type:"major"})),...SUITS.flatMap(s=>RANKS.map(r=>({name:`${r} of ${s}`,suit:s,type:"minor"})))];
 
-const MAJOR_ARCANA = [
-  "The Fool","The Magician","The High Priestess","The Empress","The Emperor",
-  "The Hierophant","The Lovers","The Chariot","Strength","The Hermit",
-  "Wheel of Fortune","Justice","The Hanged Man","Death","Temperance",
-  "The Devil","The Tower","The Star","The Moon","The Sun","Judgement","The World"
-];
-const SUITS = ["Wands","Cups","Swords","Pentacles"];
-const RANKS = ["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Page","Knight","Queen","King"];
-const ALL_CARDS = [
-  ...MAJOR_ARCANA.map(name => ({ name, suit: "Major Arcana", type: "major" })),
-  ...SUITS.flatMap(suit => RANKS.map(rank => ({ name: `${rank} of ${suit}`, suit, type: "minor" })))
-];
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
 
-// ── State ──────────────────────────────────────────────────────────────────
-let savedCards  = {};   // { cardName: { image, suit, type } }
-let pendingItems = [];  // { id, preview, card, fileName }
-let assigningId  = null;
-let currentTab   = 'upload';
-let libraryFilter = 'All';
-let apiKey = null;
-
-// ── Storage helpers ────────────────────────────────────────────────────────
-async function loadCards() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch { return {}; }
-}
-async function persistCards() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(savedCards));
-}
-
-// ── Image compression ──────────────────────────────────────────────────────
-function compressImage(file, maxDim = 600) {
-  return new Promise(resolve => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      const scale = Math.min(maxDim / img.width, maxDim / img.height, 1);
-      const canvas = document.createElement('canvas');
-      canvas.width  = Math.round(img.width  * scale);
-      canvas.height = Math.round(img.height * scale);
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      URL.revokeObjectURL(url);
-      resolve(canvas.toDataURL('image/jpeg', 0.78));
-    };
-    img.src = url;
-  });
-}
-
-// ── Toast ──────────────────────────────────────────────────────────────────
-let toastTimer = null;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.remove('hidden');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.add('hidden'), 3000);
-}
-
-// ── Progress bar ───────────────────────────────────────────────────────────
-function updateProgress() {
-  const count = Object.keys(savedCards).length;
-  document.getElementById('progress-count').textContent = `${count} / 78`;
-  document.getElementById('progress-fill').style.width  = `${(count / 78) * 100}%`;
-}
-
-// ── Tab switching ──────────────────────────────────────────────────────────
-function switchTab(tab) {
-  currentTab = tab;
-  ['upload','library','study'].forEach(t => {
-    document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
-  });
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === tab);
-  });
-  if (tab === 'library') renderLibrary();
-  if (tab === 'study')   renderStudy();
-}
-
-// ── Pending grid ───────────────────────────────────────────────────────────
-function renderPending() {
-  const section = document.getElementById('pending-section');
-  const grid    = document.getElementById('pending-grid');
-  const title   = document.getElementById('pending-title');
-  const saveBtn = document.getElementById('save-btn');
-
-  if (pendingItems.length === 0) { section.classList.add('hidden'); return; }
-  section.classList.remove('hidden');
-
-  const scanning     = pendingItems.filter(p => p.scanning).length;
-  const identified   = pendingItems.filter(p => p.card).length;
-  const errors       = pendingItems.filter(p => p.scanError).length;
-
-  if (scanning > 0) {
-    title.textContent = `Identifying ${scanning} card${scanning > 1 ? 's' : ''}… tap any to correct`;
-  } else if (errors > 0) {
-    title.textContent = `${identified} identified, ${errors} unrecognised — tap to name manually`;
-  } else {
-    title.textContent = `${identified} card${identified !== 1 ? 's' : ''} identified — tap any to correct`;
-  }
-
-  grid.innerHTML = '';
-  pendingItems.forEach(item => {
-    const card = document.createElement('div');
-    let classes = 'pending-card';
-    if (item.scanning)  classes += ' scanning';
-    if (item.card)      classes += ' assigned';
-    if (item.scanError) classes += ' error';
-    card.className = classes;
-    card.dataset.id = item.id;
-
-    let overlay = '';
-    if (item.scanning) {
-      overlay = `<div class="scan-overlay"><div class="scan-spinner"></div><div class="scan-label-text">Scanning</div></div>`;
-    }
-
-    let labelText = 'Tap to name';
-    if (item.scanning)  labelText = '…';
-    if (item.card)      labelText = item.card.name;
-    if (item.scanError) labelText = 'Tap to name';
-
-    card.innerHTML = `
-      <img src="${item.preview}" alt="" />
-      ${overlay}
-      <div class="pending-card-label">${labelText}</div>
-      <button class="pending-card-remove" data-remove="${item.id}">✕</button>
-    `;
-    card.addEventListener('click', e => {
-      if (e.target.dataset.remove || item.scanning) return;
-      openAssignModal(item.id);
+// ── localStorage storage (works in any browser, any device) ──
+function loadAllCards(){
+  try{
+    const keys=Object.keys(localStorage).filter(k=>k.startsWith(CARD_PREFIX));
+    const cards={};
+    keys.forEach(k=>{
+      try{const v=localStorage.getItem(k);if(v){cards[decodeURIComponent(k.slice(CARD_PREFIX.length))]=JSON.parse(v);}}catch{}
     });
-    card.querySelector('[data-remove]').addEventListener('click', e => {
-      e.stopPropagation();
-      pendingItems = pendingItems.filter(p => p.id !== item.id);
-      renderPending();
-    });
-    grid.appendChild(card);
-  });
-
-  const assignedCount = pendingItems.filter(p => p.card).length;
-  saveBtn.disabled = assignedCount === 0;
-  saveBtn.textContent = `Save ${assignedCount || ''} card${assignedCount !== 1 ? 's' : ''} to deck`;
+    return cards;
+  }catch{return{};}
 }
-
-// ── Assignment modal ───────────────────────────────────────────────────────
-function takenNames() {
-  return [
-    ...Object.keys(savedCards),
-    ...pendingItems.filter(p => p.card && p.id !== assigningId).map(p => p.card.name)
-  ];
-}
-
-function renderModalList(filter) {
-  const taken = takenNames();
-  const list  = document.getElementById('modal-card-list');
-  const q     = filter.toLowerCase();
-  const cards = ALL_CARDS.filter(c => c.name.toLowerCase().includes(q));
-
-  list.innerHTML = '';
-  cards.forEach(c => {
-    const isTaken = taken.includes(c.name);
-    const row = document.createElement('div');
-    row.className = `card-list-item${isTaken ? ' taken' : ''}`;
-    row.innerHTML = `<span>${c.name}</span><span class="card-suit">${c.suit}</span>`;
-    if (!isTaken) {
-      row.addEventListener('click', () => {
-        const item = pendingItems.find(p => p.id === assigningId);
-        if (item) item.card = c;
-        closeAssignModal();
-        renderPending();
-      });
-    }
-    list.appendChild(row);
-  });
-}
-
-function openAssignModal(id) {
-  assigningId = id;
-  const item  = pendingItems.find(p => p.id === id);
-  document.getElementById('modal-img').src = item.preview;
-  document.getElementById('modal-search').value = '';
-  renderModalList('');
-  document.getElementById('assign-modal').classList.remove('hidden');
-  setTimeout(() => document.getElementById('modal-search').focus(), 50);
-}
-
-function closeAssignModal() {
-  document.getElementById('assign-modal').classList.add('hidden');
-  assigningId = null;
-}
-
-// ── Library ────────────────────────────────────────────────────────────────
-function renderLibraryFilters() {
-  const filters = ['All', 'Major Arcana', ...SUITS];
-  const el = document.getElementById('library-filters');
-  el.innerHTML = '';
-  filters.forEach(f => {
-    const btn = document.createElement('button');
-    btn.className = `filter-chip${f === libraryFilter ? ' active' : ''}`;
-    btn.textContent = f;
-    btn.addEventListener('click', () => { libraryFilter = f; renderLibrary(); });
-    el.appendChild(btn);
-  });
-}
-
-function renderLibrary() {
-  renderLibraryFilters();
-  const grid  = document.getElementById('library-grid');
-  const cards = ALL_CARDS.filter(c => libraryFilter === 'All' || c.suit === libraryFilter);
-  grid.innerHTML = '';
-  cards.forEach(c => {
-    const saved = savedCards[c.name];
-    const div   = document.createElement('div');
-    div.className = 'lib-card';
-    div.title = c.name;
-    if (saved) {
-      div.innerHTML = `
-        <img src="${saved.image}" alt="${c.name}" />
-        <div class="lib-card-name">${c.name}</div>
-      `;
-    } else {
-      div.innerHTML = `
-        <div class="lib-card-empty">
-          <div class="lib-card-empty-icon">◌</div>
-          <div class="lib-card-name-empty">${c.name}</div>
-        </div>
-      `;
-    }
-    grid.appendChild(div);
-  });
-}
-
-// ── Study ──────────────────────────────────────────────────────────────────
-function renderStudy() {
-  const count = Object.keys(savedCards).length;
-  const el    = document.getElementById('study-content');
-  if (count === 0) {
-    el.innerHTML = `
-      <div class="study-placeholder-icon">☽</div>
-      <h3>Your deck awaits</h3>
-      <p>Upload your cards first to begin your studies.<br>Visit the Upload tab to add cards to your deck.</p>
-    `;
-  } else {
-    el.innerHTML = `
-      <div class="study-placeholder-icon">✦</div>
-      <h3>Study modes coming next</h3>
-      <p>You have ${count} card${count !== 1 ? 's' : ''} ready.<br>Flashcard and interpretation modes are coming in the next build.</p>
-    `;
+function saveCard(name,data){
+  try{localStorage.setItem(CARD_PREFIX+encodeURIComponent(name),JSON.stringify(data));}catch(e){
+    if(e.name==='QuotaExceededError'){alert('Storage full. Try removing some cards or clearing old data.');}
   }
 }
+function deleteCard(name){try{localStorage.removeItem(CARD_PREFIX+encodeURIComponent(name));}catch{}}
 
-// ── Auto-identify card via Claude ──────────────────────────────────────────
-async function identifyCard(base64Image) {
-  // Strip the data URL prefix to get raw base64
-  const base64 = base64Image.split(',')[1];
-
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 100,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
-          { type: 'text', text: `This is a tarot card. Identify which card it is and respond with ONLY the card name, nothing else. Use standard names like "The Fool", "The High Priestess", "Ace of Wands", "Queen of Cups", "Ten of Swords", etc. If you cannot identify the card respond with exactly: UNKNOWN` }
-        ]
-      }]
-    })
+function compressImage(file,maxDim=700){
+  return new Promise(res=>{
+    const img=new Image(),url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const scale=Math.min(maxDim/img.width,maxDim/img.height,1);
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',0.78));
+    };img.src=url;
   });
+}
 
-  if (!response.ok) throw new Error(`API error ${response.status}`);
-  const data = await response.json();
-  const name = data.content?.[0]?.text?.trim();
-  if (!name || name === 'UNKNOWN') return null;
+async function callClaude(messages,apiKey,maxTokens=600){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens,messages})
+  });
+  if(!r.ok)throw new Error(r.status);
+  const d=await r.json();
+  return(d.content?.[0]?.text||'').trim();
+}
 
-  // Match against our card list (case-insensitive, flexible)
-  const normalised = name.toLowerCase().replace(/[^a-z0-9 ]/g, '');
-  const match = ALL_CARDS.find(c =>
-    c.name.toLowerCase().replace(/[^a-z0-9 ]/g, '') === normalised
+async function identifyCard(base64,apiKey){
+  const b64=base64.split(',')[1];
+  const text=await callClaude([{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'This is a tarot card. Respond with ONLY the card name. Standard names like "The Fool", "The High Priestess", "Ace of Wands". If unrecognisable: UNKNOWN'}]}],apiKey,60);
+  if(!text||text==='UNKNOWN')return null;
+  const n=text.toLowerCase().replace(/[^a-z0-9 ]/g,'');
+  return ALL_CARDS.find(c=>c.name.toLowerCase().replace(/[^a-z0-9 ]/g,'')=== n)||null;
+}
+async function getMeanings(cardName,isReversed,apiKey){
+  return callClaude([{role:'user',content:`Give 3 brief key meanings for ${cardName} ${isReversed?'reversed':'upright'} in tarot. Comma-separated short phrases only, no numbering.`}],apiKey,120);
+}
+async function getWrongChoices(correctCard,isReversed,allNames,apiKey){
+  const pool=shuffle(allNames.filter(n=>n!==correctCard)).slice(0,12).join(', ');
+  const text=await callClaude([{role:'user',content:`For a tarot quiz about ${correctCard} (${isReversed?'reversed':'upright'}), give 3 plausible but wrong meaning phrases. Return ONLY 3 short phrases separated by |. Draw from: ${pool}`}],apiKey,150);
+  return text.split('|').map(s=>s.trim()).filter(Boolean).slice(0,3);
+}
+async function getSingleCardFeedback(cardName,isReversed,interpretation,apiKey){
+  const prompt=`You are a thoughtful tarot teacher. A student is interpreting ${cardName} ${isReversed?'reversed':'upright'}.\n\nTheir interpretation: "${interpretation}"\n\nRespond in this exact format with sections separated by |||:\nACCURACY: [1-2 sentences on accuracy vs traditional meaning]\nTHEMES: [1-2 sentences on suit/element themes captured or missed]\nMISSED: [1-2 sentences on important nuances they missed]\nENCOURAGEMENT: [1 warm sentence of encouragement]`;
+  const text=await callClaude([{role:'user',content:prompt}],apiKey,400);
+  const parts=text.split('|||').map(s=>s.trim());
+  const extract=(label,s)=>{const m=s.match(new RegExp(`${label}:\\s*(.+)`,'s'));return m?m[1].trim():s;};
+  return{accuracy:extract('ACCURACY',parts[0]||''),themes:extract('THEMES',parts[1]||''),missed:extract('MISSED',parts[2]||''),encouragement:extract('ENCOURAGEMENT',parts[3]||'')};
+}
+async function getSpreadFeedback(spreadImage,context,interpretation,apiKey){
+  const b64=spreadImage.split(',')[1];
+  const prompt=`You are a wise and warm tarot reader and teacher. The student has photographed a tarot spread.${context?`\n\nContext: "${context}"`:''}
+
+Student's interpretation: "${interpretation}"
+
+Respond with four sections separated by |||:
+CARDS: [Identify visible cards and positions]
+READING: [Your full reading of the spread]
+FEEDBACK: [Specific feedback on their interpretation]
+DEEPEN: [2-3 questions or themes to explore further]`;
+  const text=await callClaude([{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:prompt}]}],apiKey,800);
+  const parts=text.split('|||').map(s=>s.trim());
+  const extract=(label,s)=>{const m=s.match(new RegExp(`${label}:\\s*(.+)`,'s'));return m?m[1].trim():s;};
+  return{cards:extract('CARDS',parts[0]||''),reading:extract('READING',parts[1]||''),feedback:extract('FEEDBACK',parts[2]||''),deepen:extract('DEEPEN',parts[3]||'')};
+}
+
+function Toast({msg}){return msg?React.createElement('div',{className:'toast'},msg):null;}
+
+function Onboarding({onSave}){
+  const [key,setKey]=useState('');const [err,setErr]=useState('');
+  const submit=()=>{const v=key.trim();if(!v.startsWith('sk-ant-')){setErr("Doesn't look right — should start with sk-ant-");return;}localStorage.setItem(API_KEY_KEY,v);onSave(v);};
+  return React.createElement('div',{className:'onboard'},
+    React.createElement('div',{className:'osigil'},'✦'),
+    React.createElement('div',{className:'otitle'},'The Arcane Codex'),
+    React.createElement('div',{className:'osub'},'Tarot Study Companion'),
+    React.createElement('div',{className:'ocard'},
+      React.createElement('label',{className:'olabel'},'Your Anthropic API Key'),
+      React.createElement('p',{className:'odesc'},'Paste your Claude API key below. It stays on this device only — sent nowhere except directly to Anthropic when you study.'),
+      React.createElement('input',{className:'oinput',type:'password',placeholder:'sk-ant-...',value:key,autoComplete:'off',spellCheck:false,onChange:e=>{setKey(e.target.value);setErr('');},onKeyDown:e=>e.key==='Enter'&&submit()}),
+      err&&React.createElement('div',{className:'oerr'},err),
+      React.createElement('button',{className:'btn btn-p',style:{width:'100%'},onClick:submit,disabled:!key.trim()},'Enter the Codex'),
+      React.createElement('div',{className:'ohint'},'Get a key at ',React.createElement('a',{href:'https://console.anthropic.com',target:'_blank',rel:'noreferrer'},'console.anthropic.com'),' → API Keys. Do this once per device.')
+    )
   );
-  return match || null;
 }
 
-// ── File handling ──────────────────────────────────────────────────────────
-async function handleFiles(files) {
-  const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+function SettingsPanel({apiKey,onUpdate,onClose}){
+  const [key,setKey]=useState('');const [saved,setSaved]=useState(false);
+  const update=()=>{const v=key.trim();if(!v)return;localStorage.setItem(API_KEY_KEY,v);onUpdate(v);setKey('');setSaved(true);setTimeout(()=>setSaved(false),2500);};
+  return React.createElement('div',{className:'set-panel'},
+    React.createElement('div',{className:'sec-title',style:{marginBottom:10}},'API Key Settings'),
+    React.createElement('div',{className:'kstatus'},`✓ Active: sk-ant-...${apiKey.slice(-6)}`),
+    React.createElement('div',{className:'set-row'},
+      React.createElement('input',{className:'set-inp',type:'password',placeholder:'Paste new key to replace...',value:key,autoComplete:'off',onChange:e=>setKey(e.target.value)}),
+      React.createElement('button',{className:'btn btn-p',onClick:update,disabled:!key.trim()},'Update'),
+      React.createElement('button',{className:'btn btn-g',onClick:onClose},'Close')
+    ),
+    saved&&React.createElement('div',{className:'kstatus',style:{marginTop:8}},'✓ Key updated')
+  );
+}
 
-  // Add all items immediately so user sees them appear
-  const newItems = [];
-  for (const file of imageFiles) {
-    const preview = await compressImage(file);
-    const item = { id: Math.random().toString(36).slice(2), preview, card: null, fileName: file.name, scanning: true, scanError: false };
-    pendingItems.push(item);
-    newItems.push(item);
-  }
-  renderPending();
+function AssignModal({item,takenNames,onAssign,onClose}){
+  const [search,setSearch]=useState('');
+  const filtered=ALL_CARDS.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()));
+  return React.createElement('div',{className:'modal-back',onClick:e=>e.target===e.currentTarget&&onClose()},
+    React.createElement('div',{className:'modal'},
+      React.createElement('div',{className:'modal-title'},'Which card is this?'),
+      React.createElement('img',{src:item.preview,className:'modal-img',alt:''}),
+      React.createElement('input',{className:'csearch',placeholder:'Search cards...',value:search,autoFocus:true,onChange:e=>setSearch(e.target.value)}),
+      React.createElement('div',{className:'clist'},
+        filtered.map(c=>{const taken=takenNames.includes(c.name);
+          return React.createElement('div',{key:c.name,className:`citem${taken?' taken':''}`,onClick:()=>!taken&&onAssign(c)},
+            React.createElement('span',null,c.name),React.createElement('span',{className:'csuit'},c.suit));})
+      ),
+      React.createElement('button',{className:'btn btn-g',onClick:onClose},'Cancel')
+    )
+  );
+}
 
-  // Scan each in parallel
-  await Promise.all(newItems.map(async item => {
-    try {
-      const card = await identifyCard(item.preview);
-      item.card = card;
-      item.scanning = false;
-      item.scanError = !card;
-    } catch {
-      item.scanning = false;
-      item.scanError = true;
+function UploadTab({savedCards,onCardSaved,showToast,apiKey}){
+  const [pending,setPending]=useState([]);const [assigning,setAssigning]=useState(null);const [saving,setSaving]=useState(false);const fileRef=useRef();
+  const takenNames=[...Object.keys(savedCards),...pending.filter(p=>p.card&&p.id!==assigning?.id).map(p=>p.card.name)];
+  const handleFiles=useCallback(async(files)=>{
+    const imgs=Array.from(files).filter(f=>f.type.startsWith('image/'));
+    const newItems=[];
+    for(const f of imgs){const preview=await compressImage(f,600);const item={id:Math.random().toString(36).slice(2),preview,card:null,scanning:true,scanError:false};newItems.push(item);}
+    setPending(prev=>[...prev,...newItems]);
+    for(const item of newItems){
+      try{const card=await identifyCard(item.preview,apiKey);item.card=card;item.scanning=false;item.scanError=!card;}
+      catch{item.scanning=false;item.scanError=true;}
+      setPending(prev=>prev.map(p=>p.id===item.id?{...item}:p));
     }
-    renderPending();
-  }));
-}
-
-// ── Save cards ─────────────────────────────────────────────────────────────
-async function saveAssignedCards() {
-  const assigned = pendingItems.filter(p => p.card);
-  if (!assigned.length) return;
-  assigned.forEach(p => {
-    savedCards[p.card.name] = { image: p.preview, suit: p.card.suit, type: p.card.type };
-  });
-  await persistCards();
-  pendingItems = pendingItems.filter(p => !p.card);
-  updateProgress();
-  renderPending();
-  showToast(`${assigned.length} card${assigned.length > 1 ? 's' : ''} saved to your deck`);
-}
-
-// ── API Key ────────────────────────────────────────────────────────────────
-function showApp() {
-  document.getElementById('screen-onboard').classList.add('hidden');
-  document.getElementById('screen-app').classList.remove('hidden');
-  const masked = `sk-ant-...${apiKey.slice(-6)}`;
-  document.getElementById('key-status').textContent = `✓ Key active: ${masked}`;
-}
-
-function initOnboarding() {
-  const input  = document.getElementById('onboard-key-input');
-  const errEl  = document.getElementById('onboard-error');
-  const submit = document.getElementById('onboard-submit');
-
-  const attempt = () => {
-    const val = input.value.trim();
-    if (!val.startsWith('sk-ant-')) {
-      errEl.textContent = "That doesn't look like a Claude API key — it should start with sk-ant-";
-      errEl.classList.remove('hidden');
-      return;
-    }
-    errEl.classList.add('hidden');
-    localStorage.setItem(API_KEY_KEY, val);
-    apiKey = val;
-    showApp();
+  },[apiKey]);
+  const doSave=async()=>{
+    const assigned=pending.filter(p=>p.card);if(!assigned.length)return;setSaving(true);
+    for(const p of assigned){const data={image:p.preview,suit:p.card.suit,type:p.card.type};saveCard(p.card.name,data);onCardSaved(p.card.name,data);}
+    setPending(prev=>prev.filter(p=>!p.card));showToast(`${assigned.length} card${assigned.length>1?'s':''} saved`);setSaving(false);
   };
-
-  submit.addEventListener('click', attempt);
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+  const scanning=pending.filter(p=>p.scanning).length,identified=pending.filter(p=>p.card).length,errors=pending.filter(p=>p.scanError).length;
+  let st='';if(pending.length>0){if(scanning>0)st=`Identifying ${scanning} card${scanning>1?'s':''}…`;else if(errors>0)st=`${identified} identified, ${errors} unrecognised — tap to name`;else st=`${identified} identified — tap any to correct`;}
+  return React.createElement('div',null,
+    React.createElement('div',{className:'upload-zone',onDragOver:e=>{e.preventDefault();e.currentTarget.classList.add('drag')},onDragLeave:e=>e.currentTarget.classList.remove('drag'),onDrop:e=>{e.preventDefault();e.currentTarget.classList.remove('drag');handleFiles(e.dataTransfer.files)}},
+      React.createElement('div',{className:'uicon'},'✦'),React.createElement('div',{className:'umain'},'Upload card images'),React.createElement('div',{className:'usub'},'Tap below or drag and drop'),
+      React.createElement('input',{type:'file',accept:'image/*',multiple:true,ref:fileRef,style:{display:'none'},onChange:e=>{if(e.target.files.length)handleFiles(e.target.files);e.target.value=''}}),
+      React.createElement('button',{className:'btn btn-p',onClick:()=>fileRef.current.click()},'Choose Photos')
+    ),
+    pending.length>0&&React.createElement('div',null,
+      React.createElement('div',{className:'sec-title'},st),
+      React.createElement('div',{className:'pgrid'},
+        pending.map(item=>React.createElement('div',{key:item.id,className:`pcard${item.card?' assigned':''}${item.scanning?' scanning':''}${item.scanError?' err':''}`,onClick:()=>!item.scanning&&setAssigning(item)},
+          React.createElement('img',{src:item.preview,alt:''}),
+          item.scanning&&React.createElement('div',{className:'scan-ov'},React.createElement('div',{className:'spinner'}),React.createElement('div',{className:'slbl'},'Scanning')),
+          React.createElement('div',{className:'pcard-lbl'},item.scanning?'…':item.card?item.card.name:'Tap to name'),
+          React.createElement('button',{className:'pcard-rm',onClick:e=>{e.stopPropagation();setPending(prev=>prev.filter(p=>p.id!==item.id))}},'✕')
+        ))
+      ),
+      React.createElement('button',{className:'btn btn-p',style:{width:'100%'},onClick:doSave,disabled:!identified||saving},saving?'Saving…':`Save ${identified||''} card${identified!==1?'s':''} to deck`)
+    ),
+    assigning&&React.createElement(AssignModal,{item:assigning,takenNames,
+      onAssign:c=>{setPending(prev=>prev.map(p=>p.id===assigning.id?{...p,card:c,scanError:false}:p));setAssigning(null);},onClose:()=>setAssigning(null)})
+  );
 }
 
-// ── Settings ───────────────────────────────────────────────────────────────
-function initSettings() {
-  document.getElementById('settings-toggle').addEventListener('click', () => {
-    document.getElementById('settings-panel').classList.toggle('hidden');
-  });
-  document.getElementById('settings-close').addEventListener('click', () => {
-    document.getElementById('settings-panel').classList.add('hidden');
-  });
-  document.getElementById('settings-update').addEventListener('click', () => {
-    const val = document.getElementById('settings-key-input').value.trim();
-    if (!val) return;
-    localStorage.setItem(API_KEY_KEY, val);
-    apiKey = val;
-    document.getElementById('settings-key-input').value = '';
-    document.getElementById('key-status').textContent = `✓ Key active: sk-ant-...${val.slice(-6)}`;
-    const saved = document.getElementById('settings-saved');
-    saved.classList.remove('hidden');
-    setTimeout(() => saved.classList.add('hidden'), 2500);
-    showToast('API key updated');
-  });
+function LibraryTab({savedCards,onDelete,showToast}){
+  const [filter,setFilter]=useState('All');
+  const filters=['All','Major Arcana',...SUITS];
+  const cards=ALL_CARDS.filter(c=>filter==='All'||c.suit===filter);
+  return React.createElement('div',null,
+    React.createElement('div',{className:'lib-filters'},filters.map(f=>React.createElement('button',{key:f,className:`fchip${f===filter?' active':''}`,onClick:()=>setFilter(f)},f))),
+    React.createElement('div',{className:'lgrid'},cards.map(c=>{
+      const saved=savedCards[c.name];
+      return React.createElement('div',{key:c.name,className:'lcard',title:c.name,onClick:()=>{if(saved&&window.confirm(`Remove ${c.name}?`)){deleteCard(c.name);onDelete(c.name);showToast(`${c.name} removed`);}}},
+        saved?React.createElement(React.Fragment,null,React.createElement('img',{src:saved.image,alt:c.name}),React.createElement('div',{className:'lcard-name'},c.name))
+        :React.createElement('div',{className:'lcard-empty'},React.createElement('div',{className:'le-icon'},'◌'),React.createElement('div',{className:'le-name'},c.name))
+      );
+    }))
+  );
 }
 
-// ── Boot ───────────────────────────────────────────────────────────────────
-async function init() {
-  apiKey = localStorage.getItem(API_KEY_KEY);
+function FlashCard({card,isReversed,flipped,onFlip,meaning,loadingMeaning}){
+  return React.createElement('div',{className:'fc-card-wrap'},
+    React.createElement('div',{className:`fc-card${flipped?' flipped':''}`,onClick:onFlip},
+      React.createElement('div',{className:`fc-face fc-front${isReversed?' inverted':''}`},
+        React.createElement('img',{src:card.image,alt:''}),
+        React.createElement('div',{className:'fc-orientation'},isReversed?'Reversed':'Upright'),
+        !flipped&&React.createElement('div',{className:'fc-tap-hint'},'Tap to reveal')
+      ),
+      React.createElement('div',{className:'fc-face fc-back'},
+        React.createElement('div',{className:'fc-back-name'},card.name),
+        React.createElement('div',{className:'fc-back-orient'},isReversed?'Reversed':'Upright'),
+        loadingMeaning?React.createElement('div',{className:'fc-loading'},React.createElement('div',{className:'spinner'}),React.createElement('span',null,'Consulting…'))
+        :React.createElement('div',{className:'fc-back-meaning'},meaning||'')
+      )
+    )
+  );
+}
 
-  savedCards = await loadCards();
-  updateProgress();
+function InterpretTab({savedCards,apiKey}){
+  const [step,setStep]=useState('pick');const [selectedCard,setSelectedCard]=useState(null);
+  const [isReversed,setIsReversed]=useState(false);const [interpretation,setInterpretation]=useState('');
+  const [loading,setLoading]=useState(false);const [feedback,setFeedback]=useState(null);const [search,setSearch]=useState('');
+  const uploadedCards=useMemo(()=>Object.entries(savedCards).map(([name,data])=>({name,...data})),[savedCards]);
+  const filtered=uploadedCards.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()));
+  const submit=async()=>{if(!interpretation.trim())return;setLoading(true);try{const fb=await getSingleCardFeedback(selectedCard.name,isReversed,interpretation,apiKey);setFeedback(fb);setStep('feedback');}catch(e){console.error(e);}setLoading(false);};
+  const reset=()=>{setStep('pick');setSelectedCard(null);setIsReversed(false);setInterpretation('');setFeedback(null);setSearch('');};
+  if(!uploadedCards.length)return React.createElement('div',{className:'sph'},React.createElement('div',{className:'sph-icon'},'☽'),React.createElement('h3',null,'No cards yet'),React.createElement('p',null,'Upload cards first to practise interpretation.'));
+  if(step==='pick')return React.createElement('div',{style:{paddingTop:16}},
+    React.createElement('div',{className:'sec-title'},'Choose a card to interpret'),
+    React.createElement('input',{className:'csearch',style:{marginBottom:14},placeholder:'Search your cards…',value:search,onChange:e=>setSearch(e.target.value)}),
+    React.createElement('div',{className:'pick-card-grid'},
+      filtered.map(c=>React.createElement('div',{key:c.name,className:'pick-card',onClick:()=>{setSelectedCard(c);setStep('interpret');}},
+        React.createElement('img',{src:c.image,alt:c.name}),React.createElement('div',{className:'pick-card-name'},c.name)))
+    )
+  );
+  if(step==='interpret')return React.createElement('div',{className:'interp-wrap'},
+    React.createElement('div',{className:'interp-card-row'},
+      React.createElement('div',{className:`interp-thumb${isReversed?' inverted':''}`},React.createElement('img',{src:selectedCard.image,alt:selectedCard.name})),
+      React.createElement('div',{className:'interp-card-info'},
+        React.createElement('div',{className:'interp-card-name'},selectedCard.name),
+        React.createElement('div',{className:'interp-card-orient'},isReversed?'Reversed':'Upright'),
+        React.createElement('div',{className:'orient-toggle'},
+          React.createElement('button',{className:`otoggle-btn${!isReversed?' active':''}`,onClick:()=>setIsReversed(false)},'Upright'),
+          React.createElement('button',{className:`otoggle-btn${isReversed?' active':''}`,onClick:()=>setIsReversed(true)},'Reversed')
+        )
+      )
+    ),
+    React.createElement('textarea',{className:'interp-textarea',placeholder:'Write your interpretation of this card…',value:interpretation,onChange:e=>setInterpretation(e.target.value)}),
+    React.createElement('div',{style:{display:'flex',gap:10}},
+      React.createElement('button',{className:'btn btn-p',onClick:submit,disabled:!interpretation.trim()||loading},loading?'Reading…':'Get Feedback'),
+      React.createElement('button',{className:'btn btn-g',onClick:reset},'Back')
+    )
+  );
+  if(step==='feedback'&&feedback)return React.createElement('div',{className:'interp-wrap'},
+    React.createElement('div',{className:'interp-card-row'},
+      React.createElement('div',{className:`interp-thumb${isReversed?' inverted':''}`},React.createElement('img',{src:selectedCard.image,alt:selectedCard.name})),
+      React.createElement('div',{className:'interp-card-info'},React.createElement('div',{className:'interp-card-name'},selectedCard.name),React.createElement('div',{className:'interp-card-orient'},isReversed?'Reversed':'Upright'))
+    ),
+    React.createElement('div',{className:'feedback-box'},
+      React.createElement('h4',null,'Reading Feedback'),
+      React.createElement('div',{className:'feedback-section'},React.createElement('div',{className:'fb-label'},'Accuracy'),React.createElement('div',{className:'fb-text'},feedback.accuracy)),
+      React.createElement('div',{className:'feedback-section'},React.createElement('div',{className:'fb-label'},'Themes'),React.createElement('div',{className:'fb-text'},feedback.themes)),
+      React.createElement('div',{className:'feedback-section'},React.createElement('div',{className:'fb-label'},'What you missed'),React.createElement('div',{className:'fb-text'},feedback.missed)),
+      React.createElement('div',{className:'feedback-section'},React.createElement('div',{className:'fb-label'},'Encouragement'),React.createElement('div',{className:'fb-text'},feedback.encouragement))
+    ),
+    React.createElement('div',{style:{display:'flex',gap:10,flexWrap:'wrap'}},
+      React.createElement('button',{className:'btn btn-g',onClick:()=>setStep('interpret')},'Revise'),
+      React.createElement('button',{className:'btn btn-g',onClick:reset},'New Card')
+    )
+  );
+  return null;
+}
 
-  initOnboarding();
-  initSettings();
+function SpreadTab({apiKey}){
+  const [spreadImg,setSpreadImg]=useState(null);const [context,setContext]=useState('');
+  const [interpretation,setInterpretation]=useState('');const [loading,setLoading]=useState(false);
+  const [feedback,setFeedback]=useState(null);const fileRef=useRef();
+  const handleFile=async(file)=>{if(!file||!file.type.startsWith('image/'))return;const c=await compressImage(file,900);setSpreadImg(c);setFeedback(null);};
+  const submit=async()=>{if(!spreadImg||!interpretation.trim())return;setLoading(true);try{const fb=await getSpreadFeedback(spreadImg,context,interpretation,apiKey);setFeedback(fb);}catch(e){console.error(e);}setLoading(false);};
+  const reset=()=>{setSpreadImg(null);setContext('');setInterpretation('');setFeedback(null);};
+  return React.createElement('div',{className:'spread-wrap'},
+    !spreadImg&&React.createElement('div',{className:'upload-zone',onDragOver:e=>{e.preventDefault();e.currentTarget.classList.add('drag')},onDragLeave:e=>e.currentTarget.classList.remove('drag'),onDrop:e=>{e.preventDefault();e.currentTarget.classList.remove('drag');handleFile(e.dataTransfer.files[0])}},
+      React.createElement('div',{className:'uicon'},'☽'),React.createElement('div',{className:'umain'},'Upload your spread'),React.createElement('div',{className:'usub'},'A photo of your laid cards'),
+      React.createElement('input',{type:'file',accept:'image/*',ref:fileRef,style:{display:'none'},onChange:e=>{if(e.target.files[0])handleFile(e.target.files[0]);e.target.value=''}}),
+      React.createElement('button',{className:'btn btn-p',onClick:()=>fileRef.current.click()},'Choose Photo')
+    ),
+    spreadImg&&React.createElement(React.Fragment,null,
+      React.createElement('img',{src:spreadImg,className:'spread-img-preview',alt:'Your spread'}),
+      React.createElement('button',{className:'btn btn-g',style:{alignSelf:'flex-start'},onClick:reset},'Change photo'),
+      !feedback&&React.createElement(React.Fragment,null,
+        React.createElement('div',null,
+          React.createElement('div',{className:'sec-title',style:{marginBottom:8}},'Context (optional)'),
+          React.createElement('input',{className:'context-input',placeholder:'What is this reading for? e.g. "career decision", "relationship check-in"…',value:context,onChange:e=>setContext(e.target.value)})
+        ),
+        React.createElement('div',null,
+          React.createElement('div',{className:'sec-title',style:{marginBottom:8}},'Your interpretation'),
+          React.createElement('textarea',{className:'spread-textarea',placeholder:'Share your reading… What do you see? What story do the cards tell together?',value:interpretation,onChange:e=>setInterpretation(e.target.value)})
+        ),
+        React.createElement('button',{className:'btn btn-p',style:{alignSelf:'flex-start'},onClick:submit,disabled:!interpretation.trim()||loading},loading?'Reading the spread…':'Get Reading Feedback')
+      ),
+      feedback&&React.createElement(React.Fragment,null,
+        React.createElement('div',{className:'feedback-box'},
+          React.createElement('h4',null,'Spread Reading'),
+          React.createElement('div',{className:'feedback-section'},React.createElement('div',{className:'fb-label'},'Cards identified'),React.createElement('div',{className:'fb-text'},feedback.cards)),
+          React.createElement('div',{className:'feedback-section'},React.createElement('div',{className:'fb-label'},'Full reading'),React.createElement('div',{className:'fb-text'},feedback.reading)),
+          React.createElement('div',{className:'feedback-section'},React.createElement('div',{className:'fb-label'},'Feedback on your read'),React.createElement('div',{className:'fb-text'},feedback.feedback)),
+          React.createElement('div',{className:'feedback-section'},React.createElement('div',{className:'fb-label'},'To explore further'),React.createElement('div',{className:'fb-text'},feedback.deepen))
+        ),
+        React.createElement('div',{style:{display:'flex',gap:10,flexWrap:'wrap'}},
+          React.createElement('button',{className:'btn btn-g',onClick:()=>setFeedback(null)},'Try again'),
+          React.createElement('button',{className:'btn btn-g',onClick:reset},'New spread')
+        )
+      )
+    )
+  );
+}
 
-  if (apiKey) {
-    showApp();
+function StudyTab({savedCards,apiKey}){
+  const [mode,setMode]=useState(null);const [orientation,setOrientation]=useState(null);
+  const [queue,setQueue]=useState([]);const [idx,setIdx]=useState(0);
+  const [flipped,setFlipped]=useState(false);const [meaning,setMeaning]=useState('');const [loadingMeaning,setLoadingMeaning]=useState(false);
+  const [choices,setChoices]=useState([]);const [loadingChoices,setLoadingChoices]=useState(false);
+  const [answered,setAnswered]=useState(null);const [score,setScore]=useState({correct:0,total:0});const [resultMsg,setResultMsg]=useState('');
+  const uploadedCards=useMemo(()=>Object.entries(savedCards).map(([name,data])=>({name,...data})),[savedCards]);
+  const count=uploadedCards.length;
+  function buildQueue(orient){return shuffle(uploadedCards).map(card=>{let rev=false;if(orient==='reversed')rev=true;else if(orient==='mixed')rev=Math.random()<0.5;return{...card,isReversed:rev};});}
+  function startSession(orient){setOrientation(orient);const q=buildQueue(orient);setQueue(q);setIdx(0);setFlipped(false);setMeaning('');setChoices([]);setAnswered(null);setScore({correct:0,total:0});setResultMsg('');setMode('fc');loadChoices(q[0]);}
+  async function loadChoices(cardObj){
+    setLoadingChoices(true);setChoices([]);
+    const allNames=uploadedCards.map(c=>c.name);
+    try{
+      const wrongs=await getWrongChoices(cardObj.name,cardObj.isReversed,allNames,apiKey);
+      const correctMeaning=await getMeanings(cardObj.name,cardObj.isReversed,apiKey);
+      setChoices(shuffle([{text:correctMeaning,isCorrect:true},...wrongs.map(t=>({text:t,isCorrect:false}))]));
+      setMeaning(correctMeaning);
+    }catch(e){console.error(e);}
+    setLoadingChoices(false);
   }
-
-  // Nav
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-  });
-
-  // Upload zone
-  const zone  = document.getElementById('upload-zone');
-  const input = document.getElementById('file-input');
-  const uploadBtn = document.getElementById('upload-btn');
-
-  uploadBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    input.click();
-  });
-  input.addEventListener('change', () => { if (input.files.length) handleFiles(input.files); input.value = ''; });
-  zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-  zone.addEventListener('drop', e => {
-    e.preventDefault();
-    zone.classList.remove('drag-over');
-    handleFiles(e.dataTransfer.files);
-  });
-
-  // Save button
-  document.getElementById('save-btn').addEventListener('click', saveAssignedCards);
-
-  // Modal
-  document.getElementById('modal-search').addEventListener('input', e => renderModalList(e.target.value));
-  document.getElementById('modal-cancel').addEventListener('click', closeAssignModal);
-  document.getElementById('assign-modal').addEventListener('click', e => {
-    if (e.target === e.currentTarget) closeAssignModal();
-  });
+  async function handleFlip(){setFlipped(true);if(!meaning&&!loadingMeaning){setLoadingMeaning(true);try{const m=await getMeanings(queue[idx].name,queue[idx].isReversed,apiKey);setMeaning(m);}catch{}setLoadingMeaning(false);}}
+  function handleAnswer(choice){setAnswered(choice);setScore(s=>({correct:s.correct+(choice.isCorrect?1:0),total:s.total+1}));setResultMsg(choice.isCorrect?'Well read.':'Not quite — flip the card to see the meaning.');if(!flipped&&choice.isCorrect)setFlipped(true);}
+  async function nextCard(){const next=idx+1;if(next>=queue.length){const q=buildQueue(orientation);setQueue(q);setIdx(0);setFlipped(false);setMeaning('');setAnswered(null);setResultMsg('');loadChoices(q[0]);}else{setIdx(next);setFlipped(false);setMeaning('');setAnswered(null);setResultMsg('');loadChoices(queue[next]);}}
+  if(!count)return React.createElement('div',{className:'sph'},React.createElement('div',{className:'sph-icon'},'☽'),React.createElement('h3',null,'Your deck awaits'),React.createElement('p',null,'Upload cards first to begin studying.'));
+  if(!mode)return React.createElement('div',{className:'study-select'},
+    React.createElement('h2',null,'Choose your practice'),
+    React.createElement('div',{className:'mode-cards'},
+      [{orient:'upright',icon:'☀',title:'Upright',desc:'Practice the classic upright meanings of each card.'},{orient:'reversed',icon:'☽',title:'Reversed',desc:'Deepen your knowledge with inverted card meanings.'},{orient:'mixed',icon:'✦',title:'Mixed',desc:'A full reading — upright and reversed cards combined.'}].map(m=>
+        React.createElement('div',{key:m.orient,className:'mode-card',onClick:()=>startSession(m.orient)},React.createElement('div',{className:'mode-icon'},m.icon),React.createElement('h3',null,m.title),React.createElement('p',null,m.desc))
+      )
+    ),
+    React.createElement('div',{className:'fc-score'},React.createElement('span',null,count),' cards in your deck')
+  );
+  const current=queue[idx];if(!current)return null;
+  return React.createElement('div',{className:'fc-wrap'},
+    React.createElement('div',{className:'fc-meta'},`Card ${(idx%queue.length)+1} of ${queue.length}`),
+    React.createElement('div',{className:'fc-score'},'Score: ',React.createElement('span',null,score.correct),' / ',React.createElement('span',null,score.total)),
+    React.createElement(FlashCard,{card:current,isReversed:current.isReversed,flipped,onFlip:handleFlip,meaning,loadingMeaning}),
+    loadingChoices?React.createElement('div',{className:'fc-loading'},React.createElement('div',{className:'spinner'}),React.createElement('span',null,'Drawing choices…'))
+    :choices.length>0&&React.createElement('div',{className:'fc-choices'},
+      choices.map((c,i)=>React.createElement('button',{key:i,className:`fc-choice${answered?(c.isCorrect?' correct':c===answered?' wrong':c.isCorrect?' reveal':''):''}`,onClick:()=>!answered&&handleAnswer(c)},c.text))
+    ),
+    resultMsg&&React.createElement('div',{className:`fc-result ${answered?.isCorrect?'good':'bad'}`},resultMsg),
+    answered&&React.createElement('div',{className:'fc-actions'},
+      React.createElement('button',{className:'btn btn-p',onClick:nextCard},'Next Card'),
+      React.createElement('button',{className:'btn btn-g',onClick:()=>{setMode(null);setOrientation(null);}},'Change Mode')
+    )
+  );
 }
 
-init();
+function App(){
+  const [apiKey,setApiKey]=useState(()=>localStorage.getItem(API_KEY_KEY)||null);
+  const [savedCards,setSavedCards]=useState({});
+  const [tab,setTab]=useState('upload');const [showSettings,setShowSettings]=useState(false);
+  const [toast,setToast]=useState(null);const toastRef=useRef(null);
+
+  useEffect(()=>{setSavedCards(loadAllCards());},[]);
+
+  const showToast=msg=>{setToast(msg);clearTimeout(toastRef.current);toastRef.current=setTimeout(()=>setToast(null),3000);};
+  if(!apiKey)return React.createElement(Onboarding,{onSave:k=>setApiKey(k)});
+  const count=Object.keys(savedCards).length;
+  return React.createElement('div',{className:'app'},
+    React.createElement('div',{className:'header'},
+      React.createElement('div',{className:'htitle'},'The Arcane Codex'),
+      React.createElement('div',{className:'hsub'},'Tarot Study Companion'),
+      React.createElement('button',{className:'hset',onClick:()=>setShowSettings(s=>!s)},'⚙')
+    ),
+    showSettings&&React.createElement(SettingsPanel,{apiKey,onUpdate:k=>{setApiKey(k);showToast('API key updated');},onClose:()=>setShowSettings(false)}),
+    React.createElement('div',{className:'prog-wrap'},
+      React.createElement('div',{className:'prog-lbl'},React.createElement('span',{className:'pt'},'Deck Completion'),React.createElement('span',{className:'pc'},`${count} / 78`)),
+      React.createElement('div',{className:'prog-track'},React.createElement('div',{className:'prog-fill',style:{width:`${(count/78)*100}%`}}))
+    ),
+    React.createElement('div',{className:'nav'},
+      [['upload','Upload'],['library','Library'],['study','Flashcards'],['interpret','Interpret'],['spread','Spread']].map(([t,l])=>
+        React.createElement('button',{key:t,className:`nbtn${tab===t?' active':''}`,onClick:()=>setTab(t)},l))
+    ),
+    tab==='upload'&&React.createElement(UploadTab,{savedCards,apiKey,showToast,onCardSaved:(name,data)=>setSavedCards(prev=>({...prev,[name]:data}))}),
+    tab==='library'&&React.createElement(LibraryTab,{savedCards,showToast,onDelete:name=>setSavedCards(prev=>{const n={...prev};delete n[name];return n;})}),
+    tab==='study'&&React.createElement(StudyTab,{savedCards,apiKey}),
+    tab==='interpret'&&React.createElement(InterpretTab,{savedCards,apiKey}),
+    tab==='spread'&&React.createElement(SpreadTab,{apiKey}),
+    toast&&React.createElement(Toast,{msg:toast})
+  );
+}
+ReactDOM.render(React.createElement(App),document.getElementById('root'));
 </script>
 </body>
 </html>
