@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Arcane Codex</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #1e1020;
+      --gold: #c9a84c;
+      --gold-light: #e8c96a;
+      --gold-dim: #a88840;
+      --crimson: #8b1a1a;
+      --maroon: #7a1f3d;
+      --purple: #6b3fa0;
+      --purple-light: #9b6fd4;
+      --purple-dim: #4a2870;
+      --text-main: #f0e6ff;
+      --text-dim: #c4a8e0;
+    }
+
+    body {
+      background-color: #1a0f24;
+      background-image:
+        radial-gradient(ellipse at 15% 15%, rgba(107,63,160,0.18) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 85%, rgba(122,31,61,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(201,168,76,0.04) 0%, transparent 70%);
+      min-height: 100vh;
+      color: var(--text-main);
+      font-family: 'EB Garamond', serif;
+      font-size: 16px;
+    }
+
+    .app {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 16px 80px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 40px 0 32px;
+      position: relative;
+    }
+    .header::after {
+      content: '';
+      display: block;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      margin-top: 24px;
+    }
+    .header-title {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: clamp(1.4rem, 5vw, 2.2rem);
+      color: var(--gold-light);
+      letter-spacing: 0.04em;
+      text-shadow: 0 0 40px rgba(201,168,76,0.4), 0 0 80px rgba(107,63,160,0.3);
+      line-height: 1.3;
+    }
+    .header-sub {
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      color: var(--purple-light);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+    .header-settings {
+      position: absolute;
+      top: 40px;
+      right: 0;
+      background: none;
+      border: 1px solid rgba(107,63,160,0.3);
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .header-settings:hover { border-color: var(--purple-light); color: var(--gold-light); }
+
+    /* Nav */
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin: 28px 0;
+      border: 1px solid rgba(107,63,160,0.3);
+      border-radius: 4px;
+      padding: 4px;
+      background: rgba(26,15,36,0.6);
+    }
+    .nav-btn {
+      flex: 1;
+      padding: 10px 12px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { color: var(--gold-light); background: rgba(107,63,160,0.12); }
+    .nav-btn.active {
+      background: rgba(107,63,160,0.2);
+      color: var(--gold-light);
+      border: 1px solid rgba(201,168,76,0.35);
+    }
+
+    /* Progress */
+    .progress-wrap { margin-bottom: 28px; }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .progress-label .pl-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .progress-label .pl-count { font-size: 0.9rem; color: var(--gold); }
+    .progress-track {
+      height: 3px;
+      background: rgba(107,63,160,0.2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--purple), var(--gold-light));
+      border-radius: 2px;
+      transition: width 0.6s ease;
+    }
+
+    /* Section title */
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(107,63,160,0.25);
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid;
+    }
+    .btn-primary {
+      background: rgba(201,168,76,0.12);
+      border-color: var(--gold);
+      color: var(--gold-light);
+    }
+    .btn-primary:hover { background: rgba(201,168,76,0.22); }
+    .btn-primary:disabled { opacity: 0.4; cursor: default; }
+    .btn-ghost {
+      background: none;
+      border-color: rgba(107,63,160,0.35);
+      color: var(--text-dim);
+    }
+    .btn-ghost:hover { border-color: var(--purple-light); color: var(--text-main); }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 1px dashed rgba(107,63,160,0.5);
+      border-radius: 6px;
+      padding: 36px 20px;
+      text-align: center;
+      background: rgba(107,63,160,0.06);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 28px;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--purple-light);
+      background: rgba(107,63,160,0.12);
+    }
+    .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .upload-icon { font-size: 2rem; margin-bottom: 12px; }
+    .upload-main {
+      font-family: 'Cinzel', serif;
+      font-size: 0.85rem;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .upload-sub { font-size: 0.82rem; color: var(--text-dim); font-style: italic; }
+
+    /* Pending grid */
+    .pending-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .pending-card {
+      position: relative;
+      aspect-ratio: 2/3;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(201,168,76,0.2);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .pending-card:hover { border-color: var(--gold); }
+    .pending-card.assigned { border-color: var(--maroon); }
+    .pending-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .pending-card-label {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(26,15,36,0.9);
+      font-size: 0.6rem;
+      font-family: 'Cinzel', serif;
+      color: var(--gold-light);
+      padding: 4px 5px;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .pending-card-remove {
+      position: absolute;
+      top: 4px; right: 4px;
+      width: 18px; height: 18px;
+      background: rgba(139,26,26,0.85);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 0.65rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      display: none;
+      line-height: 1;
+    }
+    .pending-card:hover .pending-card-remove { display: flex; }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    .modal-backdrop.hidden { display: none; }
+    .modal {
+      background: #241535;
+      border: 1px solid rgba(107,63,160,0.45);
+      border-radius: 8px;
+      padding: 28px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+    .modal-img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(201,168,76,0.15);
+    }
+    .card-search {
+      width: 100%;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(107,63,160,0.4);
+      border-radius: 4px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .card-search:focus { border-color: var(--purple-light); }
+    .card-search::placeholder { color: var(--text-dim); }
+    .card-list {
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid rgba(107,63,160,0.25);
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    .card-list-item {
+      padding: 9px 14px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(107,63,160,0.12);
+      transition: background 0.15s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-list-item:hover { background: rgba(107,63,160,0.15); }
+    .card-list-item.taken { opacity: 0.4; pointer-events: none; }
+    .card-list-item .card-suit { font-size: 0.7rem; color: var(--purple-light); font-style: italic; }
+    .modal-actions { display: flex; gap: 10px; }
+
+    /* Library */
+    .library-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .filter-chip {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid rgba(107,63,160,0.3);
+      color: var(--text-dim);
+      background: none;
+      transition: all 0.2s;
+    }
+    .filter-chip:hover { border-color: var(--purple-light); color: var(--text-main); }
+    .filter-chip.active { background: rgba(107,63,160,0.2); border-color: var(--purple-light); color: var(--gold-light); }
+
+    .library-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 10px;
+    }
+    .lib-card {
+      position: relative;
+      aspect-ratio: 2/3;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid rgba(107,63,160,0.2);
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(107,63,160,0.05);
+    }
+    .lib-card:hover { border-color: var(--purple-light); transform: translateY(-2px); }
+    .lib-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .lib-card-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 8px;
+      gap: 6px;
+    }
+    .lib-card-empty-icon { font-size: 1.2rem; opacity: 0.3; }
+    .lib-card-name {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(26,15,36,0.92));
+      font-size: 0.58rem;
+      font-family: 'Cinzel', serif;
+      color: var(--gold-light);
+      padding: 16px 5px 5px;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .lib-card-name-empty {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      color: var(--text-dim);
+      text-align: center;
+      line-height: 1.3;
+      opacity: 0.5;
+    }
+
+    /* Study placeholder */
+    .study-placeholder {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-dim);
+    }
+    .study-placeholder-icon { font-size: 3rem; margin-bottom: 20px; opacity: 0.4; }
+    .study-placeholder h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      color: var(--gold);
+      margin-bottom: 10px;
+      letter-spacing: 0.1em;
+    }
+    .study-placeholder p { font-style: italic; font-size: 0.95rem; line-height: 1.6; }
+
+    /* Onboarding */
+    .onboard {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .onboard-sigil { font-size: 3.5rem; margin-bottom: 28px; filter: drop-shadow(0 0 20px rgba(107,63,160,0.6)); }
+    .onboard-title {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: clamp(1.3rem, 5vw, 2rem);
+      color: var(--gold-light);
+      letter-spacing: 0.04em;
+      text-shadow: 0 0 40px rgba(201,168,76,0.4), 0 0 80px rgba(107,63,160,0.3);
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+    .onboard-sub {
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      margin-bottom: 36px;
+    }
+    .onboard-card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(36,21,53,0.8);
+      border: 1px solid rgba(107,63,160,0.35);
+      border-radius: 10px;
+      padding: 32px 28px;
+      text-align: left;
+    }
+    .onboard-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      margin-bottom: 10px;
+      display: block;
+    }
+    .onboard-desc {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      font-style: italic;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .onboard-input, .settings-input {
+      width: 100%;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(107,63,160,0.4);
+      border-radius: 4px;
+      padding: 12px 14px;
+      color: var(--text-main);
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+      margin-bottom: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+      letter-spacing: 0.05em;
+    }
+    .onboard-input:focus, .settings-input:focus { border-color: var(--purple-light); }
+    .onboard-input::placeholder, .settings-input::placeholder { color: rgba(196,168,224,0.35); letter-spacing: 0; }
+    .onboard-error { color: #c97070; font-size: 0.82rem; margin-bottom: 12px; font-style: italic; }
+    .onboard-hint { font-size: 0.78rem; color: var(--text-dim); margin-top: 14px; line-height: 1.5; opacity: 0.7; }
+    .onboard-hint a { color: var(--purple-light); }
+
+    /* Settings panel */
+    .settings-panel {
+      background: rgba(36,21,53,0.95);
+      border: 1px solid rgba(107,63,160,0.4);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+    .settings-row { display: flex; align-items: center; gap: 10px; }
+    .settings-input { flex: 1; margin-bottom: 0; }
+    .key-status { font-size: 0.75rem; font-style: italic; color: var(--text-dim); margin-top: 10px; }
+    .key-status.ok { color: #7abf7a; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(36,21,53,0.97);
+      border: 1px solid var(--purple-light);
+      border-radius: 4px;
+      padding: 10px 20px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--gold-light);
+      z-index: 200;
+      animation: fadeInUp 0.3s ease;
+      white-space: nowrap;
+    }
+    .toast.hidden { display: none; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* Hidden utility */
+    .hidden { display: none !important; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+    ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- ONBOARDING SCREEN -->
+<div id="screen-onboard" class="onboard">
+  <div class="onboard-sigil">✦</div>
+  <div class="onboard-title">The Arcane Codex</div>
+  <div class="onboard-sub">Tarot Study Companion</div>
+  <div class="onboard-card">
+    <label class="onboard-label">Your Anthropic API Key</label>
+    <p class="onboard-desc">Paste your Claude API key below. It stays on this device only, never sent anywhere except directly to Anthropic when you study.</p>
+    <input id="onboard-key-input" class="onboard-input" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false" />
+    <div id="onboard-error" class="onboard-error hidden"></div>
+    <button id="onboard-submit" class="btn btn-primary" style="width:100%">Enter the Codex</button>
+    <div class="onboard-hint">
+      Get a key at <a href="https://console.anthropic.com" target="_blank" rel="noreferrer">console.anthropic.com</a> → API Keys. You'll need to do this once per device.
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="screen-app" class="app hidden">
+  <div class="header">
+    <div class="header-title">The Arcane Codex</div>
+    <div class="header-sub">Tarot Study Companion</div>
+    <button id="settings-toggle" class="header-settings" title="API Key Settings">⚙</button>
+  </div>
+
+  <!-- Settings panel -->
+  <div id="settings-panel" class="settings-panel hidden">
+    <div class="section-title" style="margin-bottom:16px">API Key Settings</div>
+    <div id="key-status" class="key-status ok" style="margin-bottom:14px"></div>
+    <div class="settings-row">
+      <input id="settings-key-input" class="settings-input" type="password" placeholder="Paste new key to replace..." autocomplete="off" spellcheck="false" />
+      <button id="settings-update" class="btn btn-primary">Update</button>
+      <button id="settings-close" class="btn btn-ghost">Close</button>
+    </div>
+    <div id="settings-saved" class="key-status ok hidden" style="margin-top:10px">✓ Key updated</div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span class="pl-title">Deck Completion</span>
+      <span class="pl-count" id="progress-count">0 / 78</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav">
+    <button class="nav-btn active" data-tab="upload">Upload</button>
+    <button class="nav-btn" data-tab="library">Library</button>
+    <button class="nav-btn" data-tab="study">Study</button>
+  </div>
+
+  <!-- Upload Tab -->
+  <div id="tab-upload">
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" id="file-input" accept="image/*" multiple />
+      <div class="upload-icon">✦</div>
+      <div class="upload-main">Upload card images</div>
+      <div class="upload-sub">Tap to select or drag and drop — multiple at once</div>
+    </div>
+    <div id="pending-section" class="hidden">
+      <div class="section-title" id="pending-title"></div>
+      <div class="pending-grid" id="pending-grid"></div>
+      <button id="save-btn" class="btn btn-primary" style="width:100%" disabled>Save cards to deck</button>
+    </div>
+  </div>
+
+  <!-- Library Tab -->
+  <div id="tab-library" class="hidden">
+    <div class="library-filters" id="library-filters"></div>
+    <div class="library-grid" id="library-grid"></div>
+  </div>
+
+  <!-- Study Tab -->
+  <div id="tab-study" class="hidden">
+    <div class="study-placeholder" id="study-content">
+      <div class="study-placeholder-icon">☽</div>
+      <h3>Your deck awaits</h3>
+      <p>Upload your cards first to begin your studies.<br>Visit the Upload tab to add cards to your deck.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Assignment Modal -->
+<div id="assign-modal" class="modal-backdrop hidden">
+  <div class="modal">
+    <div class="modal-title">Which card is this?</div>
+    <img id="modal-img" class="modal-img" src="" alt="" />
+    <input id="modal-search" class="card-search" placeholder="Search cards..." autocomplete="off" />
+    <div class="card-list" id="modal-card-list"></div>
+    <div class="modal-actions">
+      <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+
+<script>
+const STORAGE_KEY = 'tarot-learner-cards';
+const API_KEY_KEY  = 'tarot-learner-apikey';
+
+const MAJOR_ARCANA = [
+  "The Fool","The Magician","The High Priestess","The Empress","The Emperor",
+  "The Hierophant","The Lovers","The Chariot","Strength","The Hermit",
+  "Wheel of Fortune","Justice","The Hanged Man","Death","Temperance",
+  "The Devil","The Tower","The Star","The Moon","The Sun","Judgement","The World"
+];
+const SUITS = ["Wands","Cups","Swords","Pentacles"];
+const RANKS = ["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Page","Knight","Queen","King"];
+const ALL_CARDS = [
+  ...MAJOR_ARCANA.map(name => ({ name, suit: "Major Arcana", type: "major" })),
+  ...SUITS.flatMap(suit => RANKS.map(rank => ({ name: `${rank} of ${suit}`, suit, type: "minor" })))
+];
+
+// ── State ──────────────────────────────────────────────────────────────────
+let savedCards  = {};   // { cardName: { image, suit, type } }
+let pendingItems = [];  // { id, preview, card, fileName }
+let assigningId  = null;
+let currentTab   = 'upload';
+let libraryFilter = 'All';
+let apiKey = null;
+
+// ── Storage helpers ────────────────────────────────────────────────────────
+async function loadCards() {
+  try {
+    const r = await window.storage.get(STORAGE_KEY);
+    return r ? JSON.parse(r.value) : {};
+  } catch { return {}; }
+}
+async function persistCards() {
+  await window.storage.set(STORAGE_KEY, JSON.stringify(savedCards));
+}
+
+// ── Image compression ──────────────────────────────────────────────────────
+function compressImage(file, maxDim = 600) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale = Math.min(maxDim / img.width, maxDim / img.height, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', 0.78));
+    };
+    img.src = url;
+  });
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 3000);
+}
+
+// ── Progress bar ───────────────────────────────────────────────────────────
+function updateProgress() {
+  const count = Object.keys(savedCards).length;
+  document.getElementById('progress-count').textContent = `${count} / 78`;
+  document.getElementById('progress-fill').style.width  = `${(count / 78) * 100}%`;
+}
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  ['upload','library','study'].forEach(t => {
+    document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
+  });
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+  if (tab === 'library') renderLibrary();
+  if (tab === 'study')   renderStudy();
+}
+
+// ── Pending grid ───────────────────────────────────────────────────────────
+function renderPending() {
+  const section = document.getElementById('pending-section');
+  const grid    = document.getElementById('pending-grid');
+  const title   = document.getElementById('pending-title');
+  const saveBtn = document.getElementById('save-btn');
+
+  if (pendingItems.length === 0) { section.classList.add('hidden'); return; }
+  section.classList.remove('hidden');
+  title.textContent = `${pendingItems.length} image${pendingItems.length > 1 ? 's' : ''} — tap each to identify`;
+
+  grid.innerHTML = '';
+  pendingItems.forEach(item => {
+    const card = document.createElement('div');
+    card.className = `pending-card${item.card ? ' assigned' : ''}`;
+    card.dataset.id = item.id;
+    card.innerHTML = `
+      <img src="${item.preview}" alt="" />
+      <div class="pending-card-label">${item.card ? item.card.name : 'Tap to name'}</div>
+      <button class="pending-card-remove" data-remove="${item.id}">✕</button>
+    `;
+    card.addEventListener('click', e => {
+      if (e.target.dataset.remove) return;
+      openAssignModal(item.id);
+    });
+    card.querySelector('[data-remove]').addEventListener('click', e => {
+      e.stopPropagation();
+      pendingItems = pendingItems.filter(p => p.id !== item.id);
+      renderPending();
+    });
+    grid.appendChild(card);
+  });
+
+  const assignedCount = pendingItems.filter(p => p.card).length;
+  saveBtn.disabled = assignedCount === 0;
+  saveBtn.textContent = `Save ${assignedCount || ''} card${assignedCount !== 1 ? 's' : ''} to deck`;
+}
+
+// ── Assignment modal ───────────────────────────────────────────────────────
+function takenNames() {
+  return [
+    ...Object.keys(savedCards),
+    ...pendingItems.filter(p => p.card && p.id !== assigningId).map(p => p.card.name)
+  ];
+}
+
+function renderModalList(filter) {
+  const taken = takenNames();
+  const list  = document.getElementById('modal-card-list');
+  const q     = filter.toLowerCase();
+  const cards = ALL_CARDS.filter(c => c.name.toLowerCase().includes(q));
+
+  list.innerHTML = '';
+  cards.forEach(c => {
+    const isTaken = taken.includes(c.name);
+    const row = document.createElement('div');
+    row.className = `card-list-item${isTaken ? ' taken' : ''}`;
+    row.innerHTML = `<span>${c.name}</span><span class="card-suit">${c.suit}</span>`;
+    if (!isTaken) {
+      row.addEventListener('click', () => {
+        const item = pendingItems.find(p => p.id === assigningId);
+        if (item) item.card = c;
+        closeAssignModal();
+        renderPending();
+      });
+    }
+    list.appendChild(row);
+  });
+}
+
+function openAssignModal(id) {
+  assigningId = id;
+  const item  = pendingItems.find(p => p.id === id);
+  document.getElementById('modal-img').src = item.preview;
+  document.getElementById('modal-search').value = '';
+  renderModalList('');
+  document.getElementById('assign-modal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('modal-search').focus(), 50);
+}
+
+function closeAssignModal() {
+  document.getElementById('assign-modal').classList.add('hidden');
+  assigningId = null;
+}
+
+// ── Library ────────────────────────────────────────────────────────────────
+function renderLibraryFilters() {
+  const filters = ['All', 'Major Arcana', ...SUITS];
+  const el = document.getElementById('library-filters');
+  el.innerHTML = '';
+  filters.forEach(f => {
+    const btn = document.createElement('button');
+    btn.className = `filter-chip${f === libraryFilter ? ' active' : ''}`;
+    btn.textContent = f;
+    btn.addEventListener('click', () => { libraryFilter = f; renderLibrary(); });
+    el.appendChild(btn);
+  });
+}
+
+function renderLibrary() {
+  renderLibraryFilters();
+  const grid  = document.getElementById('library-grid');
+  const cards = ALL_CARDS.filter(c => libraryFilter === 'All' || c.suit === libraryFilter);
+  grid.innerHTML = '';
+  cards.forEach(c => {
+    const saved = savedCards[c.name];
+    const div   = document.createElement('div');
+    div.className = 'lib-card';
+    div.title = c.name;
+    if (saved) {
+      div.innerHTML = `
+        <img src="${saved.image}" alt="${c.name}" />
+        <div class="lib-card-name">${c.name}</div>
+      `;
+    } else {
+      div.innerHTML = `
+        <div class="lib-card-empty">
+          <div class="lib-card-empty-icon">◌</div>
+          <div class="lib-card-name-empty">${c.name}</div>
+        </div>
+      `;
+    }
+    grid.appendChild(div);
+  });
+}
+
+// ── Study ──────────────────────────────────────────────────────────────────
+function renderStudy() {
+  const count = Object.keys(savedCards).length;
+  const el    = document.getElementById('study-content');
+  if (count === 0) {
+    el.innerHTML = `
+      <div class="study-placeholder-icon">☽</div>
+      <h3>Your deck awaits</h3>
+      <p>Upload your cards first to begin your studies.<br>Visit the Upload tab to add cards to your deck.</p>
+    `;
+  } else {
+    el.innerHTML = `
+      <div class="study-placeholder-icon">✦</div>
+      <h3>Study modes coming next</h3>
+      <p>You have ${count} card${count !== 1 ? 's' : ''} ready.<br>Flashcard and interpretation modes are coming in the next build.</p>
+    `;
+  }
+}
+
+// ── File handling ──────────────────────────────────────────────────────────
+async function handleFiles(files) {
+  const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+  for (const file of imageFiles) {
+    const preview = await compressImage(file);
+    pendingItems.push({ id: Math.random().toString(36).slice(2), preview, card: null, fileName: file.name });
+  }
+  renderPending();
+}
+
+// ── Save cards ─────────────────────────────────────────────────────────────
+async function saveAssignedCards() {
+  const assigned = pendingItems.filter(p => p.card);
+  if (!assigned.length) return;
+  assigned.forEach(p => {
+    savedCards[p.card.name] = { image: p.preview, suit: p.card.suit, type: p.card.type };
+  });
+  await persistCards();
+  pendingItems = pendingItems.filter(p => !p.card);
+  updateProgress();
+  renderPending();
+  showToast(`${assigned.length} card${assigned.length > 1 ? 's' : ''} saved to your deck`);
+}
+
+// ── API Key ────────────────────────────────────────────────────────────────
+function showApp() {
+  document.getElementById('screen-onboard').classList.add('hidden');
+  document.getElementById('screen-app').classList.remove('hidden');
+  const masked = `sk-ant-...${apiKey.slice(-6)}`;
+  document.getElementById('key-status').textContent = `✓ Key active: ${masked}`;
+}
+
+function initOnboarding() {
+  const input  = document.getElementById('onboard-key-input');
+  const errEl  = document.getElementById('onboard-error');
+  const submit = document.getElementById('onboard-submit');
+
+  const attempt = () => {
+    const val = input.value.trim();
+    if (!val.startsWith('sk-ant-')) {
+      errEl.textContent = "That doesn't look like a Claude API key — it should start with sk-ant-";
+      errEl.classList.remove('hidden');
+      return;
+    }
+    errEl.classList.add('hidden');
+    localStorage.setItem(API_KEY_KEY, val);
+    apiKey = val;
+    showApp();
+  };
+
+  submit.addEventListener('click', attempt);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+}
+
+// ── Settings ───────────────────────────────────────────────────────────────
+function initSettings() {
+  document.getElementById('settings-toggle').addEventListener('click', () => {
+    document.getElementById('settings-panel').classList.toggle('hidden');
+  });
+  document.getElementById('settings-close').addEventListener('click', () => {
+    document.getElementById('settings-panel').classList.add('hidden');
+  });
+  document.getElementById('settings-update').addEventListener('click', () => {
+    const val = document.getElementById('settings-key-input').value.trim();
+    if (!val) return;
+    localStorage.setItem(API_KEY_KEY, val);
+    apiKey = val;
+    document.getElementById('settings-key-input').value = '';
+    document.getElementById('key-status').textContent = `✓ Key active: sk-ant-...${val.slice(-6)}`;
+    const saved = document.getElementById('settings-saved');
+    saved.classList.remove('hidden');
+    setTimeout(() => saved.classList.add('hidden'), 2500);
+    showToast('API key updated');
+  });
+}
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+async function init() {
+  apiKey = localStorage.getItem(API_KEY_KEY);
+
+  savedCards = await loadCards();
+  updateProgress();
+
+  initOnboarding();
+  initSettings();
+
+  if (apiKey) {
+    showApp();
+  }
+
+  // Nav
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  // Upload zone
+  const zone  = document.getElementById('upload-zone');
+  const input = document.getElementById('file-input');
+
+  input.addEventListener('change', () => handleFiles(input.files));
+  zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+  });
+
+  // Save button
+  document.getElementById('save-btn').addEventListener('click', saveAssignedCards);
+
+  // Modal
+  document.getElementById('modal-search').addEventListener('input', e => renderModalList(e.target.value));
+  document.getElementById('modal-cancel').addEventListener('click', closeAssignModal);
+  document.getElementById('assign-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeAssignModal();
+  });
+}
+
+init();
+</script>
+</body>
+</html>
