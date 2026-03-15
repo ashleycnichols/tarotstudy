@@ -169,6 +169,11 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 15%,rg
 .citem:hover{background:rgba(107,63,160,.15)}
 .citem.taken{opacity:.4;pointer-events:none}
 .csuit{font-size:.68rem;color:var(--purple-light);font-style:italic}
+.gen-wrap{margin-top:16px;padding-top:16px;border-top:1px solid rgba(107,63,160,.2)}
+.gen-progress{height:4px;background:rgba(107,63,160,.2);border-radius:2px;overflow:hidden;margin:10px 0}
+.gen-progress-fill{height:100%;background:linear-gradient(to right,var(--purple),var(--gold-light));border-radius:2px;transition:width .4s ease}
+.gen-status{font-size:.78rem;color:var(--text-dim);font-style:italic;margin-top:6px}
+.gen-status.ok{color:#7abf7a}
 /* Toast */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(36,21,53,.97);border:1px solid var(--purple-light);border-radius:4px;padding:9px 18px;font-family:'Cinzel','Palatino Linotype',serif;font-size:.68rem;letter-spacing:.1em;color:var(--gold-light);z-index:200;animation:fup .3s ease;white-space:nowrap}
 @keyframes fup{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
@@ -213,9 +218,18 @@ async function saveCard(name,data){
 async function deleteCard(name){
   await FB.deleteDoc(FB.doc(FB.db,'cards',name.replace(/\./g,'__dot__')));
 }
+async function loadAllMeanings(){
+  const snap = await FB.getDocs(FB.collection(FB.db,'meanings'));
+  const m = {};
+  snap.forEach(d => { m[d.id.replace(/__dot__/g,'.')] = d.data(); });
+  return m;
+}
+async function saveMeaning(name,data){
+  await FB.setDoc(FB.doc(FB.db,'meanings',name.replace(/\./g,'__dot__')),data);
+}
 
 // Boot React app
-window._tarotDB = { loadAllCards, saveCard, deleteCard };
+window._tarotDB = { loadAllCards, saveCard, deleteCard, loadAllMeanings, saveMeaning };
 window.dispatchEvent(new CustomEvent('tarotReady'));
 </script>
 
@@ -229,7 +243,7 @@ window.dispatchEvent(new CustomEvent('tarotReady'));
 
 function bootApp(){
 const {useState,useEffect,useCallback,useRef,useMemo} = React;
-const {loadAllCards,saveCard,deleteCard} = window._tarotDB;
+const {loadAllCards,saveCard,deleteCard,loadAllMeanings,saveMeaning} = window._tarotDB;
 const API_KEY = 'tarot-learner-apikey';
 const MAJOR=["The Fool","The Magician","The High Priestess","The Empress","The Emperor","The Hierophant","The Lovers","The Chariot","Strength","The Hermit","Wheel of Fortune","Justice","The Hanged Man","Death","Temperance","The Devil","The Tower","The Star","The Moon","The Sun","Judgement","The World"];
 const SUITS=["Wands","Cups","Swords","Pentacles"];
@@ -330,18 +344,61 @@ function Onboarding({onSave}){
   );
 }
 
-function SettingsPanel({apiKey,onUpdate,onClose}){
+function SettingsPanel({apiKey,onUpdate,onClose,savedCards,meanings,onMeaningsUpdated}){
   const [key,setKey]=useState('');const [saved,setSaved]=useState(false);
+  const [generating,setGenerating]=useState(false);
+  const [genProgress,setGenProgress]=useState(0);const [genStatus,setGenStatus]=useState('');
   const go=()=>{const v=key.trim();if(!v)return;localStorage.setItem(API_KEY,v);onUpdate(v);setKey('');setSaved(true);setTimeout(()=>setSaved(false),2500);};
+
+  const cardNames=Object.keys(savedCards);
+  const missingCount=cardNames.filter(n=>!meanings[n]).length;
+
+  const generateAll=async()=>{
+    const missing=cardNames.filter(n=>!meanings[n]);
+    if(!missing.length){setGenStatus('All meanings already generated!');return;}
+    setGenerating(true);setGenProgress(0);
+    let done=0;
+    for(const name of missing){
+      setGenStatus('Generating: '+name);
+      try{
+        const d=await getCardDetails(name,apiKey);
+        await saveMeaning(name,d);
+        onMeaningsUpdated(name,d);
+      }catch(err){console.error('Failed for '+name,err);}
+      done++;
+      setGenProgress(Math.round((done/missing.length)*100));
+    }
+    setGenerating(false);
+    setGenStatus('Done! All '+done+' meanings saved.');
+  };
+
   return e('div',{className:'set-panel'},
-    e('div',{className:'sec-title',style:{marginBottom:10}},'API Key Settings'),
+    e('div',{className:'sec-title',style:{marginBottom:10}},'Settings'),
     e('div',{className:'kstatus'},'✓ Active: sk-ant-...'+apiKey.slice(-6)),
     e('div',{className:'set-row'},
       e('input',{className:'set-inp',type:'password',placeholder:'Paste new key...',value:key,autoComplete:'off',onChange:ev=>setKey(ev.target.value)}),
-      e('button',{className:'btn btn-p',onClick:go,disabled:!key.trim()},'Update'),
+      e('button',{className:'btn btn-p',onClick:go,disabled:!key.trim()},'Update Key'),
       e('button',{className:'btn btn-g',onClick:onClose},'Close')
     ),
-    saved&&e('div',{className:'kstatus',style:{marginTop:8}},'✓ Updated')
+    saved&&e('div',{className:'kstatus',style:{marginTop:8}},'✓ Key updated'),
+    e('div',{className:'gen-wrap'},
+      e('div',{className:'sec-title',style:{marginBottom:10}},'Card Meanings'),
+      e('p',{style:{fontSize:'.85rem',color:'var(--text-dim)',fontStyle:'italic',marginBottom:12,lineHeight:1.5}},
+        cardNames.length===0?'No cards uploaded yet.'
+        :missingCount===0?'All '+cardNames.length+' cards have saved meanings — instant loading everywhere.'
+        :''+missingCount+' of '+cardNames.length+' cards are missing meanings. Generate them once to enable instant loading.'
+      ),
+      cardNames.length>0&&e('button',{
+        className:'btn btn-p',
+        onClick:generateAll,
+        disabled:generating||missingCount===0
+      },generating?'Generating…':missingCount===0?'All meanings saved ✓':'Generate meanings for all cards'),
+      generating&&e('div',null,
+        e('div',{className:'gen-progress'},e('div',{className:'gen-progress-fill',style:{width:genProgress+'%'}})),
+        e('div',{className:'gen-status'},genStatus+' ('+genProgress+'%)')
+      ),
+      !generating&&genStatus&&e('div',{className:'gen-status ok'},genStatus)
+    )
   );
 }
 
@@ -361,7 +418,7 @@ function LibraryTab({savedCards,onDelete,showToast}){
   );
 }
 
-function CardOfTheDayTab({savedCards,apiKey}){
+function CardOfTheDayTab({savedCards,apiKey,meanings}){
   const cards=useMemo(()=>Object.entries(savedCards).map(([n,d])=>({name:n,...d})),[savedCards]);
   const [details,setDetails]=useState(null);
   const [loading,setLoading]=useState(false);
@@ -373,8 +430,19 @@ function CardOfTheDayTab({savedCards,apiKey}){
   },[cards.length]);
   useEffect(()=>{
     if(!card||!apiKey)return;
-    setLoading(true);setDetails(null);
-    getCardOfTheDay(card.name,apiKey).then(d=>{setDetails(d);setLoading(false);}).catch(err=>{console.error(err);setLoading(false);});
+    // Use cached meaning if available, otherwise generate
+    if(meanings[card.name]){
+      setDetails({...meanings[card.name],daily:''});
+      // Still generate the daily guidance since it's date-specific
+      setLoading(true);
+      claude([{role:'user',content:`Write 3-4 sentences of daily guidance for ${card.name} as today's tarot card. What energy does it bring today? How should the reader work with it? Keep it personal and present-tense.`}],apiKey,200)
+        .then(daily=>setDetails(d=>({...d,daily})))
+        .catch(err=>console.error(err))
+        .finally(()=>setLoading(false));
+    } else {
+      setLoading(true);setDetails(null);
+      getCardOfTheDay(card.name,apiKey).then(d=>{setDetails(d);setLoading(false);}).catch(err=>{console.error(err);setLoading(false);});
+    }
   },[card&&card.name,apiKey]);
   if(!cards.length)return e('div',{className:'sph'},e('div',{className:'sph-icon'},'☽'),e('h3',null,'No cards yet'),e('p',null,'Add cards to your deck first.'));
   const today=new Date().toLocaleDateString('en-IE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
@@ -402,7 +470,7 @@ function CardOfTheDayTab({savedCards,apiKey}){
   );
 }
 
-function CardDetailsTab({savedCards,apiKey}){
+function CardDetailsTab({savedCards,apiKey,meanings}){
   const [selected,setSelected]=useState(null);
   const [details,setDetails]=useState(null);
   const [loading,setLoading]=useState(false);
@@ -410,9 +478,14 @@ function CardDetailsTab({savedCards,apiKey}){
   const cards=useMemo(()=>Object.entries(savedCards).map(([n,d])=>({name:n,...d})),[savedCards]);
   const filtered=cards.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()));
   const pick=async c=>{
-    setSelected(c);setDetails(null);setLoading(true);
-    try{setDetails(await getCardDetails(c.name,apiKey));}catch(err){console.error(err);}
-    setLoading(false);
+    setSelected(c);
+    if(meanings[c.name]){
+      setDetails(meanings[c.name]);setLoading(false);
+    } else {
+      setDetails(null);setLoading(true);
+      try{setDetails(await getCardDetails(c.name,apiKey));}catch(err){console.error(err);}
+      setLoading(false);
+    }
   };
   if(!cards.length)return e('div',{className:'sph'},e('div',{className:'sph-icon'},'☽'),e('h3',null,'No cards yet'),e('p',null,'Add cards to your deck first.'));
   if(!selected)return e('div',{style:{paddingTop:16}},
@@ -552,6 +625,7 @@ function SpreadTab({apiKey}){
 function App(){
   const [apiKey,setApiKey]=useState(()=>localStorage.getItem(API_KEY)||null);
   const [savedCards,setSavedCards]=useState({});
+  const [meanings,setMeanings]=useState({});
   const [loading,setLoading]=useState(true);
   const [loadErr,setLoadErr]=useState(false);
   const [tab,setTab]=useState('today');
@@ -560,8 +634,8 @@ function App(){
   const toastRef=useRef(null);
 
   useEffect(()=>{
-    loadAllCards()
-      .then(cards=>{setSavedCards(cards);setLoading(false);})
+    Promise.all([loadAllCards(),loadAllMeanings()])
+      .then(([cards,m])=>{setSavedCards(cards);setMeanings(m);setLoading(false);})
       .catch(err=>{console.error('Load failed:',err);setLoadErr(true);setLoading(false);});
   },[]);
 
@@ -591,7 +665,10 @@ function App(){
       e('div',{className:'hsub'},'Tarot Study Companion'),
       e('button',{className:'hset',onClick:()=>setShowSettings(s=>!s)},'⚙')
     ),
-    showSettings&&e(SettingsPanel,{apiKey,onUpdate:k=>{setApiKey(k);showToast('API key updated');},onClose:()=>setShowSettings(false)}),
+    showSettings&&e(SettingsPanel,{apiKey,savedCards,meanings,
+      onUpdate:k=>{setApiKey(k);showToast('API key updated');},
+      onClose:()=>setShowSettings(false),
+      onMeaningsUpdated:(name,d)=>setMeanings(prev=>({...prev,[name]:d}))}),
     e('div',{className:'prog-wrap'},
       e('div',{className:'prog-lbl'},e('span',{className:'pt'},'Deck Completion'),e('span',{className:'pc'},count+' / 78')),
       e('div',{className:'prog-track'},e('div',{className:'prog-fill',style:{width:(count/78*100)+'%'}}))
@@ -600,10 +677,10 @@ function App(){
       [['today','Today'],['library','Library'],['study','Flashcards'],['details','Cards'],['spread','Spread']].map(([t,l])=>
         e('button',{key:t,className:'nbtn'+(tab===t?' active':''),onClick:()=>setTab(t)},l))
     ),
-    tab==='today'&&e(CardOfTheDayTab,{savedCards,apiKey}),
+    tab==='today'&&e(CardOfTheDayTab,{savedCards,apiKey,meanings}),
     tab==='library'&&e(LibraryTab,{savedCards,showToast,onDelete:n=>setSavedCards(p=>{const c={...p};delete c[n];return c;})}),
     tab==='study'&&e(StudyTab,{savedCards,apiKey}),
-    tab==='details'&&e(CardDetailsTab,{savedCards,apiKey}),
+    tab==='details'&&e(CardDetailsTab,{savedCards,apiKey,meanings}),
     tab==='spread'&&e(SpreadTab,{apiKey}),
     e(Toast,{msg:toast})
   );
