@@ -4,9 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="theme-color" content="#1a0f24" />
 <title>The Arcane Codex</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--gold:#c9a84c;--gold-light:#e8c96a;--maroon:#7a1f3d;--purple:#6b3fa0;--purple-light:#9b6fd4;--text-main:#f0e6ff;--text-dim:#c4a8e0;--bg:#1a0f24;--bg2:#241535;}
@@ -35,61 +35,45 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 15%,rg
 .btn-p:disabled{opacity:.4;cursor:default}
 .btn-g{background:none;border-color:rgba(107,63,160,.35);color:var(--text-dim)}
 .btn-g:hover{border-color:var(--purple-light);color:var(--text-main)}
-.upload-zone{border:1px dashed rgba(107,63,160,.5);border-radius:6px;padding:32px 20px;text-align:center;background:rgba(107,63,160,.06);transition:all .2s;margin-bottom:24px}
-.upload-zone.drag,.upload-zone:hover{border-color:var(--purple-light);background:rgba(107,63,160,.12)}
-.uicon{font-size:1.8rem;margin-bottom:10px}
-.umain{font-family:'Cinzel','Palatino Linotype',serif;font-size:.82rem;color:var(--gold);letter-spacing:.08em;margin-bottom:6px}
-.usub{font-size:.8rem;color:var(--text-dim);font-style:italic;margin-bottom:14px}
-.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:10px;margin-bottom:24px}
-.pcard{position:relative;aspect-ratio:2/3;border-radius:4px;overflow:hidden;border:1px solid rgba(201,168,76,.2);cursor:pointer;transition:border-color .2s}
-.pcard:hover{border-color:var(--gold)}.pcard.assigned{border-color:var(--maroon)}.pcard.scanning{border-color:rgba(155,111,212,.5);pointer-events:none}.pcard.err{border-color:#c97070}
-.pcard img{width:100%;height:100%;object-fit:cover;display:block}
-.pcard-lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(26,15,36,.9);font-size:.58rem;font-family:'Cinzel','Palatino Linotype',serif;color:var(--gold-light);padding:4px 5px;text-align:center;line-height:1.3}
-.pcard-rm{position:absolute;top:4px;right:4px;width:18px;height:18px;background:rgba(139,26,26,.85);border:none;border-radius:50%;color:#fff;font-size:.6rem;cursor:pointer;display:none;align-items:center;justify-content:center}
-.pcard:hover .pcard-rm{display:flex}
-.scan-ov{position:absolute;inset:0;background:rgba(26,15,36,.75);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
-.spinner{width:18px;height:18px;border:2px solid rgba(155,111,212,.3);border-top-color:var(--purple-light);border-radius:50%;animation:spin .8s linear infinite}
+.spinner{width:18px;height:18px;border:2px solid rgba(155,111,212,.3);border-top-color:var(--purple-light);border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
-.slbl{font-family:'Cinzel','Palatino Linotype',serif;font-size:.52rem;color:var(--purple-light);letter-spacing:.1em}
-.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
-.modal{background:var(--bg2);border:1px solid rgba(107,63,160,.45);border-radius:8px;padding:24px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto}
-.modal-title{font-family:'Cinzel','Palatino Linotype',serif;font-size:.76rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
-.modal-img{width:100%;max-height:180px;object-fit:contain;border-radius:4px;margin-bottom:16px;border:1px solid rgba(201,168,76,.15)}
-.csearch{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(107,63,160,.4);border-radius:4px;padding:9px 12px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:1rem;margin-bottom:10px;outline:none;transition:border-color .2s}
-.csearch:focus{border-color:var(--purple-light)}.csearch::placeholder{color:var(--text-dim)}
-.clist{max-height:200px;overflow-y:auto;border:1px solid rgba(107,63,160,.25);border-radius:4px;margin-bottom:14px}
-.citem{padding:8px 12px;cursor:pointer;font-size:.88rem;border-bottom:1px solid rgba(107,63,160,.1);transition:background .15s;display:flex;justify-content:space-between;align-items:center}
-.citem:hover{background:rgba(107,63,160,.15)}.citem.taken{opacity:.4;pointer-events:none}
-.csuit{font-size:.68rem;color:var(--purple-light);font-style:italic}
+.loading{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.loading p{font-family:'Cinzel','Palatino Linotype',serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--purple-light)}
+.sph{text-align:center;padding:50px 20px;color:var(--text-dim)}
+.sph-icon{font-size:2.5rem;margin-bottom:16px;opacity:.35}
+.sph h3{font-family:'Cinzel','Palatino Linotype',serif;font-size:.95rem;color:var(--gold);margin-bottom:8px;letter-spacing:.1em}
+.sph p{font-style:italic;font-size:.9rem;line-height:1.6}
+.onboard{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center}
+.osigil{font-size:3rem;margin-bottom:24px}
+.otitle{font-family:'Cinzel Decorative','Palatino Linotype',serif;font-size:clamp(1.2rem,4vw,1.8rem);color:var(--gold-light);letter-spacing:.04em;text-shadow:0 0 40px rgba(201,168,76,.4);margin-bottom:10px;line-height:1.3}
+.osub{font-family:'Cinzel','Palatino Linotype',serif;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--purple-light);margin-bottom:32px}
+.ocard{width:100%;max-width:400px;background:rgba(36,21,53,.8);border:1px solid rgba(107,63,160,.35);border-radius:10px;padding:28px 24px;text-align:left}
+.olabel{font-family:'Cinzel','Palatino Linotype',serif;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--purple-light);margin-bottom:8px;display:block}
+.odesc{font-size:.86rem;color:var(--text-dim);font-style:italic;line-height:1.6;margin-bottom:16px}
+.oinput{width:100%;background:rgba(0,0,0,.4);border:1px solid rgba(107,63,160,.4);border-radius:4px;padding:11px 13px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:1rem;margin-bottom:14px;outline:none;transition:border-color .2s}
+.oinput:focus{border-color:var(--purple-light)}
+.oinput::placeholder{color:rgba(196,168,224,.3)}
+.oerr{color:#c97070;font-size:.8rem;margin-bottom:10px;font-style:italic}
+.ohint{font-size:.76rem;color:var(--text-dim);margin-top:12px;line-height:1.5;opacity:.7}
+.ohint a{color:var(--purple-light)}
+.set-panel{background:rgba(36,21,53,.95);border:1px solid rgba(107,63,160,.4);border-radius:8px;padding:20px;margin-bottom:24px}
+.set-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.set-inp{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(107,63,160,.4);border-radius:4px;padding:9px 12px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:.95rem;outline:none;transition:border-color .2s}
+.kstatus{font-size:.74rem;font-style:italic;color:#7abf7a;margin-top:8px}
+/* Library */
 .lib-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
 .fchip{padding:4px 12px;border-radius:20px;font-family:'Cinzel','Palatino Linotype',serif;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:1px solid rgba(107,63,160,.3);color:var(--text-dim);background:none;transition:all .2s}
-.fchip:hover{border-color:var(--purple-light);color:var(--text-main)}.fchip.active{background:rgba(107,63,160,.2);border-color:var(--purple-light);color:var(--gold-light)}
+.fchip:hover{border-color:var(--purple-light);color:var(--text-main)}
+.fchip.active{background:rgba(107,63,160,.2);border-color:var(--purple-light);color:var(--gold-light)}
 .lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:8px}
 .lcard{position:relative;aspect-ratio:2/3;border-radius:5px;overflow:hidden;border:1px solid rgba(107,63,160,.2);cursor:pointer;transition:all .2s;background:rgba(107,63,160,.05)}
 .lcard:hover{border-color:var(--purple-light);transform:translateY(-2px)}
 .lcard img{width:100%;height:100%;object-fit:cover;display:block}
 .lcard-name{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(26,15,36,.92));font-size:.55rem;font-family:'Cinzel','Palatino Linotype',serif;color:var(--gold-light);padding:14px 4px 4px;text-align:center;line-height:1.3}
 .lcard-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:6px;gap:4px}
-.le-icon{font-size:1rem;opacity:.25}.le-name{font-family:'Cinzel','Palatino Linotype',serif;font-size:.54rem;color:var(--text-dim);text-align:center;line-height:1.3;opacity:.5}
-.set-panel{background:rgba(36,21,53,.95);border:1px solid rgba(107,63,160,.4);border-radius:8px;padding:20px;margin-bottom:24px}
-.set-row{display:flex;align-items:center;gap:8px;margin-top:10px}
-.set-inp{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(107,63,160,.4);border-radius:4px;padding:9px 12px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:.95rem;outline:none;transition:border-color .2s}
-.kstatus{font-size:.74rem;font-style:italic;color:#7abf7a;margin-top:8px}
-.onboard{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center}
-.osigil{font-size:3rem;margin-bottom:24px}.otitle{font-family:'Cinzel Decorative','Palatino Linotype',serif;font-size:clamp(1.2rem,4vw,1.8rem);color:var(--gold-light);letter-spacing:.04em;text-shadow:0 0 40px rgba(201,168,76,.4);margin-bottom:10px;line-height:1.3}
-.osub{font-family:'Cinzel','Palatino Linotype',serif;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--purple-light);margin-bottom:32px}
-.ocard{width:100%;max-width:400px;background:rgba(36,21,53,.8);border:1px solid rgba(107,63,160,.35);border-radius:10px;padding:28px 24px;text-align:left}
-.olabel{font-family:'Cinzel','Palatino Linotype',serif;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--purple-light);margin-bottom:8px;display:block}
-.odesc{font-size:.86rem;color:var(--text-dim);font-style:italic;line-height:1.6;margin-bottom:16px}
-.oinput{width:100%;background:rgba(0,0,0,.4);border:1px solid rgba(107,63,160,.4);border-radius:4px;padding:11px 13px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:1rem;margin-bottom:14px;outline:none;transition:border-color .2s;letter-spacing:.04em}
-.oinput:focus{border-color:var(--purple-light)}.oinput::placeholder{color:rgba(196,168,224,.3);letter-spacing:0}
-.oerr{color:#c97070;font-size:.8rem;margin-bottom:10px;font-style:italic}
-.ohint{font-size:.76rem;color:var(--text-dim);margin-top:12px;line-height:1.5;opacity:.7}.ohint a{color:var(--purple-light)}
-.loading{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
-.loading .spinner{width:28px;height:28px;border-width:3px}
-.loading p{font-family:'Cinzel','Palatino Linotype',serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--purple-light)}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(36,21,53,.97);border:1px solid var(--purple-light);border-radius:4px;padding:9px 18px;font-family:'Cinzel','Palatino Linotype',serif;font-size:.68rem;letter-spacing:.1em;color:var(--gold-light);z-index:200;animation:fup .3s ease;white-space:nowrap}
-@keyframes fup{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.le-icon{font-size:1rem;opacity:.25}
+.le-name{font-family:'Cinzel','Palatino Linotype',serif;font-size:.54rem;color:var(--text-dim);text-align:center;line-height:1.3;opacity:.5}
+/* Flashcards */
 .study-select{display:flex;flex-direction:column;align-items:center;padding:32px 16px;gap:20px}
 .study-select h2{font-family:'Cinzel','Palatino Linotype',serif;font-size:1rem;color:var(--gold);letter-spacing:.15em;text-transform:uppercase}
 .mode-cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:480px}
@@ -100,11 +84,14 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 15%,rg
 .mode-icon{font-size:1.4rem;margin-bottom:10px}
 .fc-wrap{display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:20px}
 .fc-meta{font-family:'Cinzel','Palatino Linotype',serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--purple-light);text-align:center}
+.fc-score{font-family:'Cinzel','Palatino Linotype',serif;font-size:.72rem;color:var(--text-dim);letter-spacing:.1em;text-align:center}
+.fc-score span{color:var(--gold)}
 .fc-card-wrap{width:100%;max-width:280px;perspective:1000px}
 .fc-card{width:100%;aspect-ratio:2/3;position:relative;transform-style:preserve-3d;transition:transform .55s ease;cursor:pointer;border-radius:10px}
 .fc-card.flipped{transform:rotateY(180deg)}
 .fc-face{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;overflow:hidden;border:1px solid rgba(107,63,160,.3)}
-.fc-front{background:var(--bg2)}.fc-back{transform:rotateY(180deg);background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;gap:12px}
+.fc-front{background:var(--bg2)}
+.fc-back{transform:rotateY(180deg);background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;gap:12px}
 .fc-front img{width:100%;height:100%;object-fit:cover;display:block;border-radius:10px}
 .fc-front.inverted img{transform:rotate(180deg)}
 .fc-orientation{position:absolute;top:8px;left:0;right:0;text-align:center;font-family:'Cinzel','Palatino Linotype',serif;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--purple-light);background:rgba(26,15,36,.75);padding:4px 0;pointer-events:none}
@@ -114,50 +101,24 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 15%,rg
 .fc-back-meaning{font-size:.88rem;color:var(--text-dim);font-style:italic;line-height:1.6}
 .fc-loading{display:flex;align-items:center;gap:8px;font-family:'Cinzel','Palatino Linotype',serif;font-size:.65rem;color:var(--text-dim);letter-spacing:.1em}
 .fc-choices{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px}
-.fc-choice{background:rgba(36,21,53,.6);border:1px solid rgba(107,63,160,.25);border-radius:6px;padding:12px 16px;cursor:pointer;transition:all .2s;font-size:.9rem;color:var(--text-main);text-align:left;font-family:'EB Garamond',Georgia,serif}
+.fc-choice{background:rgba(36,21,53,.6);border:1px solid rgba(107,63,160,.25);border-radius:6px;padding:12px 16px;cursor:pointer;transition:all .2s;font-size:.9rem;color:var(--text-main);text-align:left;font-family:'EB Garamond',Georgia,serif;width:100%}
 .fc-choice:hover{border-color:var(--purple-light);background:rgba(107,63,160,.15)}
 .fc-choice.correct{border-color:#7abf7a;background:rgba(122,191,122,.1);color:#7abf7a;pointer-events:none}
 .fc-choice.wrong{border-color:#c97070;background:rgba(201,112,112,.1);color:#c97070;pointer-events:none}
 .fc-choice.reveal{border-color:#7abf7a;background:rgba(122,191,122,.08);color:#7abf7a;pointer-events:none}
 .fc-result{text-align:center;font-family:'Cinzel','Palatino Linotype',serif;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;padding:6px 0}
-.fc-result.good{color:#7abf7a}.fc-result.bad{color:#c97070}
+.fc-result.good{color:#7abf7a}
+.fc-result.bad{color:#c97070}
 .fc-actions{display:flex;gap:10px;width:100%;max-width:420px;justify-content:center}
-.fc-score{font-family:'Cinzel','Palatino Linotype',serif;font-size:.72rem;color:var(--text-dim);letter-spacing:.1em;text-align:center}
-.fc-score span{color:var(--gold)}
-.interp-wrap{display:flex;flex-direction:column;gap:20px;max-width:600px;margin:0 auto;padding:16px 0}
-.interp-card-row{display:flex;gap:16px;align-items:flex-start}
-.interp-thumb{width:110px;flex-shrink:0;aspect-ratio:2/3;border-radius:6px;overflow:hidden;border:1px solid rgba(107,63,160,.3)}
-.interp-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.interp-thumb.inverted img{transform:rotate(180deg)}
-.interp-card-info{flex:1}
-.interp-card-name{font-family:'Cinzel Decorative','Palatino Linotype',serif;font-size:1.1rem;color:var(--gold-light);margin-bottom:4px}
-.interp-card-orient{font-family:'Cinzel','Palatino Linotype',serif;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--purple-light);margin-bottom:12px}
-.orient-toggle{display:flex;gap:8px}
-.otoggle-btn{padding:5px 14px;border-radius:20px;font-family:'Cinzel','Palatino Linotype',serif;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:1px solid rgba(107,63,160,.3);color:var(--text-dim);background:none;transition:all .2s}
-.otoggle-btn.active{background:rgba(107,63,160,.2);border-color:var(--purple-light);color:var(--gold-light)}
-.interp-textarea{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(107,63,160,.35);border-radius:6px;padding:12px 14px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:1rem;line-height:1.6;resize:vertical;min-height:110px;outline:none;transition:border-color .2s}
-.interp-textarea:focus{border-color:var(--purple-light)}.interp-textarea::placeholder{color:var(--text-dim);font-style:italic}
-.feedback-box{background:rgba(36,21,53,.7);border:1px solid rgba(107,63,160,.3);border-radius:8px;padding:20px;line-height:1.7;font-size:.95rem}
-.feedback-box h4{font-family:'Cinzel','Palatino Linotype',serif;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
-.feedback-section{margin-bottom:16px}.feedback-section:last-child{margin-bottom:0}
-.fb-label{font-family:'Cinzel','Palatino Linotype',serif;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--purple-light);margin-bottom:6px}
-.fb-text{color:var(--text-dim);font-style:italic;line-height:1.7}
-.pick-card-list{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto}
-.pick-card-row{display:flex;align-items:center;gap:12px;background:rgba(36,21,53,.5);border:1px solid rgba(107,63,160,.2);border-radius:6px;padding:8px 12px;cursor:pointer;transition:all .2s}
-.pick-card-row:hover{border-color:var(--gold);background:rgba(107,63,160,.15)}
-.pick-card-thumb{width:38px;flex-shrink:0;aspect-ratio:2/3;border-radius:3px;overflow:hidden;border:1px solid rgba(107,63,160,.3)}
-.pick-card-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.pick-card-row-name{font-family:'Cinzel','Palatino Linotype',serif;font-size:.82rem;color:var(--text-main);letter-spacing:.04em}
-.pick-card-row-suit{font-size:.72rem;color:var(--purple-light);font-style:italic;margin-top:2px}
-/* Card of the Day */
+/* Card of the day */
 .cotd-wrap{display:flex;flex-direction:column;align-items:center;gap:24px;padding:16px 0;max-width:560px;margin:0 auto}
 .cotd-date{font-family:'Cinzel','Palatino Linotype',serif;font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;color:var(--purple-light);text-align:center}
 .cotd-card-row{display:flex;gap:20px;align-items:flex-start;width:100%}
-.cotd-thumb{width:130px;flex-shrink:0;aspect-ratio:2/3;border-radius:8px;overflow:hidden;border:1px solid rgba(201,168,76,.3);box-shadow:0 0 30px rgba(107,63,160,.2)}
+.cotd-thumb{width:130px;flex-shrink:0;aspect-ratio:2/3;border-radius:8px;overflow:hidden;border:1px solid rgba(201,168,76,.3)}
 .cotd-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .cotd-header{flex:1;padding-top:4px}
-.cotd-name{font-family:'Cinzel Decorative','Palatino Linotype',serif;font-size:clamp(1rem,3vw,1.4rem);color:var(--gold-light);line-height:1.3;margin-bottom:6px;text-shadow:0 0 20px rgba(201,168,76,.3)}
-.cotd-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.cotd-name{font-family:'Cinzel Decorative','Palatino Linotype',serif;font-size:clamp(1rem,3vw,1.4rem);color:var(--gold-light);line-height:1.3;margin-bottom:10px}
+.cotd-meta{display:flex;flex-wrap:wrap;gap:6px}
 .cotd-badge{padding:3px 10px;border-radius:20px;font-family:'Cinzel','Palatino Linotype',serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;border:1px solid rgba(107,63,160,.4);color:var(--purple-light);background:rgba(107,63,160,.1)}
 .cotd-sections{width:100%;display:flex;flex-direction:column;gap:14px}
 .cotd-section{background:rgba(36,21,53,.6);border:1px solid rgba(107,63,160,.25);border-radius:8px;padding:16px 18px}
@@ -168,7 +129,7 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 15%,rg
 .cotd-reflection-text{font-size:1rem;color:var(--text-main);font-style:italic;line-height:1.7}
 .cotd-loading{display:flex;flex-direction:column;align-items:center;gap:14px;padding:40px 0}
 .cotd-loading p{font-family:'Cinzel','Palatino Linotype',serif;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--purple-light)}
-/* Card details in interpret tab */
+/* Card details */
 .card-detail-wrap{display:flex;flex-direction:column;gap:16px;max-width:560px;margin:0 auto;padding:16px 0}
 .card-detail-row{display:flex;gap:18px;align-items:flex-start}
 .card-detail-thumb{width:110px;flex-shrink:0;aspect-ratio:2/3;border-radius:6px;overflow:hidden;border:1px solid rgba(201,168,76,.25)}
@@ -176,49 +137,100 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 15%,rg
 .card-detail-name{font-family:'Cinzel Decorative','Palatino Linotype',serif;font-size:1.1rem;color:var(--gold-light);margin-bottom:8px}
 .card-detail-badges{display:flex;flex-wrap:wrap;gap:5px}
 .card-detail-badge{padding:3px 10px;border-radius:20px;font-family:'Cinzel','Palatino Linotype',serif;font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;border:1px solid rgba(107,63,160,.4);color:var(--purple-light);background:rgba(107,63,160,.1)}
+/* Card picker list */
+.pick-card-list{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto}
+.pick-card-row{display:flex;align-items:center;gap:12px;background:rgba(36,21,53,.5);border:1px solid rgba(107,63,160,.2);border-radius:6px;padding:8px 12px;cursor:pointer;transition:all .2s}
+.pick-card-row:hover{border-color:var(--gold);background:rgba(107,63,160,.15)}
+.pick-card-thumb{width:38px;flex-shrink:0;aspect-ratio:2/3;border-radius:3px;overflow:hidden;border:1px solid rgba(107,63,160,.3)}
+.pick-card-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.pick-card-row-name{font-family:'Cinzel','Palatino Linotype',serif;font-size:.82rem;color:var(--text-main);letter-spacing:.04em}
+.pick-card-row-suit{font-size:.72rem;color:var(--purple-light);font-style:italic;margin-top:2px}
+/* Spread */
+.spread-wrap{display:flex;flex-direction:column;gap:20px;padding:16px 0}
 .spread-img-preview{width:100%;max-height:280px;object-fit:contain;border-radius:8px;border:1px solid rgba(107,63,160,.3);display:block}
-.spread-textarea{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(107,63,160,.35);border-radius:6px;padding:12px 14px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:1rem;line-height:1.6;resize:vertical;min-height:130px;outline:none;transition:border-color .2s}
-.spread-textarea:focus{border-color:var(--purple-light)}.spread-textarea::placeholder{color:var(--text-dim);font-style:italic}
-.context-input{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(107,63,160,.35);border-radius:6px;padding:10px 14px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:.95rem;outline:none;transition:border-color .2s}
-.context-input:focus{border-color:var(--purple-light)}.context-input::placeholder{color:var(--text-dim);font-style:italic}
-.sph{text-align:center;padding:50px 20px;color:var(--text-dim)}
-.sph-icon{font-size:2.5rem;margin-bottom:16px;opacity:.35}
-.sph h3{font-family:'Cinzel','Palatino Linotype',serif;font-size:.95rem;color:var(--gold);margin-bottom:8px;letter-spacing:.1em}
-.sph p{font-style:italic;font-size:.9rem;line-height:1.6}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:rgba(0,0,0,.2)}::-webkit-scrollbar-thumb{background:rgba(201,168,76,.3);border-radius:3px}
+.spread-textarea,.interp-textarea{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(107,63,160,.35);border-radius:6px;padding:12px 14px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:1rem;line-height:1.6;resize:vertical;min-height:120px;outline:none;transition:border-color .2s}
+.spread-textarea:focus,.interp-textarea:focus{border-color:var(--purple-light)}
+.spread-textarea::placeholder,.interp-textarea::placeholder{color:var(--text-dim);font-style:italic}
+.context-input,.csearch{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(107,63,160,.35);border-radius:6px;padding:10px 14px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:.95rem;outline:none;transition:border-color .2s;margin-bottom:12px}
+.context-input:focus,.csearch:focus{border-color:var(--purple-light)}
+.context-input::placeholder,.csearch::placeholder{color:var(--text-dim);font-style:italic}
+.feedback-box{background:rgba(36,21,53,.7);border:1px solid rgba(107,63,160,.3);border-radius:8px;padding:20px;line-height:1.7;font-size:.95rem}
+.feedback-box h4{font-family:'Cinzel','Palatino Linotype',serif;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.feedback-section{margin-bottom:16px}
+.feedback-section:last-child{margin-bottom:0}
+.fb-label{font-family:'Cinzel','Palatino Linotype',serif;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--purple-light);margin-bottom:6px}
+.fb-text{color:var(--text-dim);font-style:italic;line-height:1.7}
+/* Modal */
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal{background:var(--bg2);border:1px solid rgba(107,63,160,.45);border-radius:8px;padding:24px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto}
+.modal-title{font-family:'Cinzel','Palatino Linotype',serif;font-size:.76rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.clist{max-height:220px;overflow-y:auto;border:1px solid rgba(107,63,160,.25);border-radius:4px;margin-bottom:14px}
+.citem{padding:8px 12px;cursor:pointer;font-size:.88rem;border-bottom:1px solid rgba(107,63,160,.1);transition:background .15s;display:flex;justify-content:space-between;align-items:center}
+.citem:hover{background:rgba(107,63,160,.15)}
+.citem.taken{opacity:.4;pointer-events:none}
+.csuit{font-size:.68rem;color:var(--purple-light);font-style:italic}
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(36,21,53,.97);border:1px solid var(--purple-light);border-radius:4px;padding:9px 18px;font-family:'Cinzel','Palatino Linotype',serif;font-size:.68rem;letter-spacing:.1em;color:var(--gold-light);z-index:200;animation:fup .3s ease;white-space:nowrap}
+@keyframes fup{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:rgba(0,0,0,.2)}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,.3);border-radius:3px}
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 </head>
 <body>
-<div id="root"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+<div id="root"><div style="color:#9b6fd4;font-family:serif;text-align:center;padding:40px">Loading…</div></div>
+
+<!-- React from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+
+<!-- Firebase via module, boots the app when ready -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDU43lAmE8mGLb4BpRVMCF0_IngytjpdSM",
-  authDomain: "tarotstudy.firebaseapp.com",
-  projectId: "tarotstudy",
-  storageBucket: "tarotstudy.firebasestorage.app",
-  messagingSenderId: "897620280064",
-  appId: "1:897620280064:web:7e3945ded122d0093829e5"
+const FB = {
+  db: getFirestore(initializeApp({
+    apiKey:"AIzaSyDU43lAmE8mGLb4BpRVMCF0_IngytjpdSM",
+    authDomain:"tarotstudy.firebaseapp.com",
+    projectId:"tarotstudy",
+    storageBucket:"tarotstudy.firebasestorage.app",
+    messagingSenderId:"897620280064",
+    appId:"1:897620280064:web:7e3945ded122d0093829e5"
+  })),
+  doc, setDoc, deleteDoc, collection, getDocs
 };
 
-const firebaseApp = initializeApp(firebaseConfig);
-const db = getFirestore(firebaseApp);
-const COLLECTION = 'cards';
+async function loadAllCards(){
+  const snap = await FB.getDocs(FB.collection(FB.db,'cards'));
+  const cards = {};
+  snap.forEach(d => { cards[d.id.replace(/__dot__/g,'.')] = d.data(); });
+  return cards;
+}
+async function saveCard(name,data){
+  await FB.setDoc(FB.doc(FB.db,'cards',name.replace(/\./g,'__dot__')),data);
+}
+async function deleteCard(name){
+  await FB.deleteDoc(FB.doc(FB.db,'cards',name.replace(/\./g,'__dot__')));
+}
 
-window._db = db;
-window._firestoreOps = { doc, setDoc, getDoc, deleteDoc, collection, getDocs };
-
-window.dispatchEvent(new Event('firebaseReady'));
+// Boot React app
+window._tarotDB = { loadAllCards, saveCard, deleteCard };
+window.dispatchEvent(new CustomEvent('tarotReady'));
 </script>
+
 <script>
-window.addEventListener('firebaseReady', function() {
-const {useState,useEffect,useCallback,useRef,useMemo}=React;
-const API_KEY_KEY='tarot-learner-apikey';
+(function waitForAll(){
+  if(!window.React || !window.ReactDOM || !window._tarotDB){
+    return setTimeout(waitForAll, 30);
+  }
+  bootApp();
+})();
+
+function bootApp(){
+const {useState,useEffect,useCallback,useRef,useMemo} = React;
+const {loadAllCards,saveCard,deleteCard} = window._tarotDB;
+const API_KEY = 'tarot-learner-apikey';
 const MAJOR=["The Fool","The Magician","The High Priestess","The Empress","The Emperor","The Hierophant","The Lovers","The Chariot","Strength","The Hermit","Wheel of Fortune","Justice","The Hanged Man","Death","Temperance","The Devil","The Tower","The Star","The Moon","The Sun","Judgement","The World"];
 const SUITS=["Wands","Cups","Swords","Pentacles"];
 const RANKS=["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Page","Knight","Queen","King"];
@@ -226,32 +238,7 @@ const ALL_CARDS=[...MAJOR.map(n=>({name:n,suit:"Major Arcana",type:"major"})),..
 
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
 
-// ── Firestore storage (cross-device, no size limit) ──
-const {doc,setDoc,getDoc,deleteDoc,collection,getDocs}=window._firestoreOps;
-const db=window._db;
-
-async function loadAllCards(){
-  try{
-    const snap=await getDocs(collection(db,'cards'));
-    const cards={};
-    snap.forEach(d=>{cards[d.id.replace(/__dot__/g,'.')]=d.data();});
-    return cards;
-  }catch(e){console.error('loadAllCards',e);return{};}
-}
-async function saveCard(name,data){
-  try{
-    const id=name.replace(/\./g,'__dot__');
-    await setDoc(doc(db,'cards',id),data);
-  }catch(e){console.error('saveCard',e);alert('Error saving card: '+e.message);}
-}
-async function deleteCard(name){
-  try{
-    const id=name.replace(/\./g,'__dot__');
-    await deleteDoc(doc(db,'cards',id));
-  }catch(e){console.error('deleteCard',e);}
-}
-
-function compressImage(file,maxDim=700){
+function compressImage(file,maxDim=600){
   return new Promise(res=>{
     const img=new Image(),url=URL.createObjectURL(file);
     img.onload=()=>{
@@ -264,231 +251,153 @@ function compressImage(file,maxDim=700){
   });
 }
 
-async function callClaude(messages,apiKey,maxTokens=600){
+async function claude(messages,apiKey,maxTokens=600){
   const r=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
     body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens,messages})
   });
   if(!r.ok)throw new Error(r.status);
-  const d=await r.json();
-  return(d.content?.[0]?.text||'').trim();
+  return((await r.json()).content?.[0]?.text||'').trim();
 }
 
-async function identifyCard(base64,apiKey){
-  const b64=base64.split(',')[1];
-  const text=await callClaude([{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'This is a tarot card. Respond with ONLY the card name. Standard names like "The Fool", "The High Priestess", "Ace of Wands". If unrecognisable: UNKNOWN'}]}],apiKey,60);
-  if(!text||text==='UNKNOWN')return null;
-  const n=text.toLowerCase().replace(/[^a-z0-9 ]/g,'');
+async function identifyCard(b64src,apiKey){
+  const b64=b64src.split(',')[1];
+  const t=await claude([{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:'This is a tarot card. Reply with ONLY the card name. E.g. "The Fool", "Ace of Wands". If unclear: UNKNOWN'}]}],apiKey,60);
+  if(!t||t==='UNKNOWN')return null;
+  const n=t.toLowerCase().replace(/[^a-z0-9 ]/g,'');
   return ALL_CARDS.find(c=>c.name.toLowerCase().replace(/[^a-z0-9 ]/g,'')=== n)||null;
 }
-async function getMeanings(cardName,isReversed,apiKey){
-  return callClaude([{role:'user',content:`Give 3 brief key meanings for ${cardName} ${isReversed?'reversed':'upright'} in tarot. Comma-separated short phrases only, no numbering.`}],apiKey,120);
+
+async function getMeanings(name,rev,apiKey){
+  return claude([{role:'user',content:`3 brief key meanings for ${name} ${rev?'reversed':'upright'} in tarot. Comma-separated phrases only.`}],apiKey,120);
 }
-async function getAllChoices(cardName,isReversed,allNames,apiKey){
-  const pool=shuffle(allNames.filter(n=>n!==cardName)).slice(0,6).join(', ');
-  const orient=isReversed?'reversed':'upright';
-  const prompt=`You are writing answer options for a tarot flashcard quiz.
 
-The card is: ${cardName} (${orient})
-
-Write exactly 4 answer options — one correct, three plausible but wrong.
-Rules:
-- Every option must be exactly 4-6 words long, no more, no less
-- Every option must follow the same pattern: 2-3 comma-separated short phrases
-- Do NOT make the correct answer longer or more detailed than the others
-- Wrong answers should draw from the energy of these cards: ${pool}
-- Return ONLY the 4 options separated by | with CORRECT: prefix on the right one
-
-Example format:
-new beginnings, leap of faith, potential|CORRECT: folly, innocence, fresh start|endings, completion, final steps|conflict, struggle, inner turmoil`;
-  const text=await callClaude([{role:'user',content:prompt}],apiKey,200);
-  const parts=text.split('|').map(s=>s.trim()).filter(Boolean);
+async function getAllChoices(name,rev,allNames,apiKey){
+  const pool=shuffle(allNames.filter(n=>n!==name)).slice(0,6).join(', ');
+  const t=await claude([{role:'user',content:`Tarot flashcard for ${name} (${rev?'reversed':'upright'}). Write 4 answer options — 1 correct, 3 wrong. Each must be 4-6 words. Same length and style. Return ONLY 4 options separated by | with CORRECT: prefix on the right one. Wrong answers use energy from: ${pool}`}],apiKey,200);
+  const parts=t.split('|').map(s=>s.trim()).filter(Boolean);
   let correct='',wrongs=[];
-  parts.forEach(p=>{
-    if(p.startsWith('CORRECT:')){correct=p.replace('CORRECT:','').trim();}
-    else{wrongs.push(p);}
-  });
+  parts.forEach(p=>{if(p.startsWith('CORRECT:')){correct=p.replace('CORRECT:','').trim();}else{wrongs.push(p);}});
   if(!correct){correct=parts[0]||'';wrongs=parts.slice(1);}
   return{correct,choices:shuffle([{text:correct,isCorrect:true},...wrongs.slice(0,3).map(t=>({text:t,isCorrect:false}))])};
 }
-async function getSingleCardFeedback(cardName,isReversed,interpretation,apiKey){
-  const prompt=`You are a thoughtful tarot teacher. A student is interpreting ${cardName} ${isReversed?'reversed':'upright'}.\n\nTheir interpretation: "${interpretation}"\n\nRespond in this exact format with sections separated by |||:\nACCURACY: [1-2 sentences on accuracy vs traditional meaning]\nTHEMES: [1-2 sentences on suit/element themes captured or missed]\nMISSED: [1-2 sentences on important nuances they missed]\nENCOURAGEMENT: [1 warm sentence of encouragement]`;
-  const text=await callClaude([{role:'user',content:prompt}],apiKey,400);
-  const parts=text.split('|||').map(s=>s.trim());
-  const extract=(label,s)=>{const m=s.match(new RegExp(`${label}:\\s*(.+)`,'s'));return m?m[1].trim():s;};
-  return{accuracy:extract('ACCURACY',parts[0]||''),themes:extract('THEMES',parts[1]||''),missed:extract('MISSED',parts[2]||''),encouragement:extract('ENCOURAGEMENT',parts[3]||'')};
-}
-async function getSpreadFeedback(spreadImage,context,interpretation,apiKey){
-  const b64=spreadImage.split(',')[1];
-  const prompt=`You are a wise and warm tarot reader and teacher. The student has photographed a tarot spread.${context?`\n\nContext: "${context}"`:''}
 
-Student's interpretation: "${interpretation}"
-
-Respond with four sections separated by |||:
-CARDS: [Identify visible cards and positions]
-READING: [Your full reading of the spread]
-FEEDBACK: [Specific feedback on their interpretation]
-DEEPEN: [2-3 questions or themes to explore further]`;
-  const text=await callClaude([{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:prompt}]}],apiKey,800);
-  const parts=text.split('|||').map(s=>s.trim());
-  const extract=(label,s)=>{const m=s.match(new RegExp(`${label}:\\s*(.+)`,'s'));return m?m[1].trim():s;};
-  return{cards:extract('CARDS',parts[0]||''),reading:extract('READING',parts[1]||''),feedback:extract('FEEDBACK',parts[2]||''),deepen:extract('DEEPEN',parts[3]||'')};
+async function getCardDetails(name,apiKey){
+  const t=await claude([{role:'user',content:`Rich tarot reference for ${name}. Sections separated by |||:\nUPRIGHT: [2-3 sentences]\nREVERSED: [2-3 sentences]\nASSOCIATIONS: [format: Zodiac: X | Element: X | Number: X]\nSYMBOLS: [2-3 sentences on imagery]\nREFLECTION: [one poetic question]`}],apiKey,500);
+  const p=t.split('|||').map(s=>s.trim());
+  const ex=(lbl,s)=>{const m=s.match(new RegExp(lbl+':\\s*(.+)','s'));return m?m[1].trim():s;};
+  const a=ex('ASSOCIATIONS',p[2]||'');
+  return{upright:ex('UPRIGHT',p[0]||''),reversed:ex('REVERSED',p[1]||''),zodiac:(a.match(/Zodiac:\s*([^|]+)/)||[])[1]?.trim()||'',element:(a.match(/Element:\s*([^|]+)/)||[])[1]?.trim()||'',number:(a.match(/Number:\s*([^|]+)/)||[])[1]?.trim()||'',symbols:ex('SYMBOLS',p[3]||''),reflection:ex('REFLECTION',p[4]||'')};
 }
 
-async function getCardDetails(cardName,apiKey){
-  const prompt=`You are an expert tarot reader. Give a rich reference reading for ${cardName}.
-
-Respond with exactly these sections separated by |||:
-UPRIGHT: [2-3 sentences on upright meaning]
-REVERSED: [2-3 sentences on reversed meaning]
-ASSOCIATIONS: [zodiac sign, element, numerology number — format exactly as: Zodiac: X | Element: X | Number: X]
-SYMBOLS: [2-3 sentences on key symbols and imagery in this card]
-REFLECTION: [One evocative question or prompt for contemplation — make it poetic and personal]`;
-  const text=await callClaude([{role:'user',content:prompt}],apiKey,500);
-  const parts=text.split('|||').map(s=>s.trim());
-  const extract=(label,s)=>{const m=s.match(new RegExp(`${label}:\\s*(.+)`,'s'));return m?m[1].trim():s;};
-  const assocRaw=extract('ASSOCIATIONS',parts[2]||'');
-  const zodiac=(assocRaw.match(/Zodiac:\s*([^|]+)/)||[])[1]?.trim()||'';
-  const element=(assocRaw.match(/Element:\s*([^|]+)/)||[])[1]?.trim()||'';
-  const number=(assocRaw.match(/Number:\s*([^|]+)/)||[])[1]?.trim()||'';
-  return{upright:extract('UPRIGHT',parts[0]||''),reversed:extract('REVERSED',parts[1]||''),zodiac,element,number,symbols:extract('SYMBOLS',parts[3]||''),reflection:extract('REFLECTION',parts[4]||'')};
+async function getCardOfTheDay(name,apiKey){
+  const t=await claude([{role:'user',content:`Card of the Day reading for ${name}. Sections separated by |||:\nUPRIGHT: [2-3 sentences]\nREVERSED: [2-3 sentences]\nASSOCIATIONS: [format: Zodiac: X | Element: X | Number: X]\nSYMBOLS: [2-3 sentences]\nDAILY: [3-4 sentences of daily guidance]\nREFLECTION: [one poetic question to carry today]`}],apiKey,600);
+  const p=t.split('|||').map(s=>s.trim());
+  const ex=(lbl,s)=>{const m=s.match(new RegExp(lbl+':\\s*(.+)','s'));return m?m[1].trim():s;};
+  const a=ex('ASSOCIATIONS',p[2]||'');
+  return{upright:ex('UPRIGHT',p[0]||''),reversed:ex('REVERSED',p[1]||''),zodiac:(a.match(/Zodiac:\s*([^|]+)/)||[])[1]?.trim()||'',element:(a.match(/Element:\s*([^|]+)/)||[])[1]?.trim()||'',number:(a.match(/Number:\s*([^|]+)/)||[])[1]?.trim()||'',symbols:ex('SYMBOLS',p[3]||''),daily:ex('DAILY',p[4]||''),reflection:ex('REFLECTION',p[5]||'')};
 }
 
-async function getCardOfTheDay(cardName,apiKey){
-  const prompt=`You are a wise tarot reader offering a Card of the Day reading for ${cardName}.
-
-Respond with exactly these sections separated by |||:
-UPRIGHT: [2-3 sentences on upright meaning]
-REVERSED: [2-3 sentences on reversed meaning]
-ASSOCIATIONS: [Format exactly as: Zodiac: X | Element: X | Number: X]
-SYMBOLS: [2-3 sentences on key symbols and imagery]
-DAILY: [3-4 sentences of personalised daily guidance — what energy this card brings today, what to be aware of, how to work with it]
-REFLECTION: [One poetic, evocative question to carry through the day]`;
-  const text=await callClaude([{role:'user',content:prompt}],apiKey,600);
-  const parts=text.split('|||').map(s=>s.trim());
-  const extract=(label,s)=>{const m=s.match(new RegExp(`${label}:\\s*(.+)`,'s'));return m?m[1].trim():s;};
-  const assocRaw=extract('ASSOCIATIONS',parts[2]||'');
-  const zodiac=(assocRaw.match(/Zodiac:\s*([^|]+)/)||[])[1]?.trim()||'';
-  const element=(assocRaw.match(/Element:\s*([^|]+)/)||[])[1]?.trim()||'';
-  const number=(assocRaw.match(/Number:\s*([^|]+)/)||[])[1]?.trim()||'';
-  return{upright:extract('UPRIGHT',parts[0]||''),reversed:extract('REVERSED',parts[1]||''),zodiac,element,number,symbols:extract('SYMBOLS',parts[3]||''),daily:extract('DAILY',parts[4]||''),reflection:extract('REFLECTION',parts[5]||'')};
+async function getSpreadFeedback(imgSrc,context,interp,apiKey){
+  const b64=imgSrc.split(',')[1];
+  const prompt=`Wise tarot reader. Student photographed a spread.${context?'\nContext: "'+context+'"':''}\nStudent interpretation: "${interp}"\nSections separated by |||\nCARDS: [identify cards]\nREADING: [your full reading]\nFEEDBACK: [feedback on their read]\nDEEPEN: [2-3 questions to explore]`;
+  const t=await claude([{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:prompt}]}],apiKey,800);
+  const p=t.split('|||').map(s=>s.trim());
+  const ex=(lbl,s)=>{const m=s.match(new RegExp(lbl+':\\s*(.+)','s'));return m?m[1].trim():s;};
+  return{cards:ex('CARDS',p[0]||''),reading:ex('READING',p[1]||''),feedback:ex('FEEDBACK',p[2]||''),deepen:ex('DEEPEN',p[3]||'')};
 }
+
+// ── Components ──
+
+function Toast({msg}){return msg?React.createElement('div',{className:'toast'},msg):null;}
 
 function Onboarding({onSave}){
   const [key,setKey]=useState('');const [err,setErr]=useState('');
-  const submit=()=>{const v=key.trim();if(!v.startsWith('sk-ant-')){setErr("Doesn't look right — should start with sk-ant-");return;}localStorage.setItem(API_KEY_KEY,v);onSave(v);};
-  return React.createElement('div',{className:'onboard'},
-    React.createElement('div',{className:'osigil'},'✦'),
-    React.createElement('div',{className:'otitle'},'The Arcane Codex'),
-    React.createElement('div',{className:'osub'},'Tarot Study Companion'),
-    React.createElement('div',{className:'ocard'},
-      React.createElement('label',{className:'olabel'},'Your Anthropic API Key'),
-      React.createElement('p',{className:'odesc'},'Paste your Claude API key below. It stays on this device only — sent nowhere except directly to Anthropic when you study.'),
-      React.createElement('input',{className:'oinput',type:'password',placeholder:'sk-ant-...',value:key,autoComplete:'off',spellCheck:false,onChange:e=>{setKey(e.target.value);setErr('');},onKeyDown:e=>e.key==='Enter'&&submit()}),
-      err&&React.createElement('div',{className:'oerr'},err),
-      React.createElement('button',{className:'btn btn-p',style:{width:'100%'},onClick:submit,disabled:!key.trim()},'Enter the Codex'),
-      React.createElement('div',{className:'ohint'},'Get a key at ',React.createElement('a',{href:'https://console.anthropic.com',target:'_blank',rel:'noreferrer'},'console.anthropic.com'),' → API Keys. Do this once per device.')
+  const go=()=>{const v=key.trim();if(!v.startsWith('sk-ant-')){setErr("Should start with sk-ant-");return;}localStorage.setItem(API_KEY,v);onSave(v);};
+  return e('div',{className:'onboard'},
+    e('div',{className:'osigil'},'✦'),
+    e('div',{className:'otitle'},'The Arcane Codex'),
+    e('div',{className:'osub'},'Tarot Study Companion'),
+    e('div',{className:'ocard'},
+      e('label',{className:'olabel'},'Your Anthropic API Key'),
+      e('p',{className:'odesc'},'Paste your Claude API key below. Stays on this device only.'),
+      e('input',{className:'oinput',type:'password',placeholder:'sk-ant-...',value:key,autoComplete:'off',onChange:ev=>{setKey(ev.target.value);setErr('');},onKeyDown:ev=>ev.key==='Enter'&&go()}),
+      err&&e('div',{className:'oerr'},err),
+      e('button',{className:'btn btn-p',style:{width:'100%'},onClick:go,disabled:!key.trim()},'Enter the Codex'),
+      e('div',{className:'ohint'},'Get a key at ',e('a',{href:'https://console.anthropic.com',target:'_blank',rel:'noreferrer'},'console.anthropic.com'),' → API Keys.')
     )
   );
 }
 
 function SettingsPanel({apiKey,onUpdate,onClose}){
   const [key,setKey]=useState('');const [saved,setSaved]=useState(false);
-  const update=()=>{const v=key.trim();if(!v)return;localStorage.setItem(API_KEY_KEY,v);onUpdate(v);setKey('');setSaved(true);setTimeout(()=>setSaved(false),2500);};
-  return React.createElement('div',{className:'set-panel'},
-    React.createElement('div',{className:'sec-title',style:{marginBottom:10}},'API Key Settings'),
-    React.createElement('div',{className:'kstatus'},`✓ Active: sk-ant-...${apiKey.slice(-6)}`),
-    React.createElement('div',{className:'set-row'},
-      React.createElement('input',{className:'set-inp',type:'password',placeholder:'Paste new key to replace...',value:key,autoComplete:'off',onChange:e=>setKey(e.target.value)}),
-      React.createElement('button',{className:'btn btn-p',onClick:update,disabled:!key.trim()},'Update'),
-      React.createElement('button',{className:'btn btn-g',onClick:onClose},'Close')
+  const go=()=>{const v=key.trim();if(!v)return;localStorage.setItem(API_KEY,v);onUpdate(v);setKey('');setSaved(true);setTimeout(()=>setSaved(false),2500);};
+  return e('div',{className:'set-panel'},
+    e('div',{className:'sec-title',style:{marginBottom:10}},'API Key Settings'),
+    e('div',{className:'kstatus'},'✓ Active: sk-ant-...'+apiKey.slice(-6)),
+    e('div',{className:'set-row'},
+      e('input',{className:'set-inp',type:'password',placeholder:'Paste new key...',value:key,autoComplete:'off',onChange:ev=>setKey(ev.target.value)}),
+      e('button',{className:'btn btn-p',onClick:go,disabled:!key.trim()},'Update'),
+      e('button',{className:'btn btn-g',onClick:onClose},'Close')
     ),
-    saved&&React.createElement('div',{className:'kstatus',style:{marginTop:8}},'✓ Key updated')
+    saved&&e('div',{className:'kstatus',style:{marginTop:8}},'✓ Updated')
   );
 }
 
-function AssignModal({item,takenNames,onAssign,onClose}){
-  const [search,setSearch]=useState('');
-  const filtered=ALL_CARDS.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()));
-  return React.createElement('div',{className:'modal-back',onClick:e=>e.target===e.currentTarget&&onClose()},
-    React.createElement('div',{className:'modal'},
-      React.createElement('div',{className:'modal-title'},'Which card is this?'),
-      React.createElement('img',{src:item.preview,className:'modal-img',alt:''}),
-      React.createElement('input',{className:'csearch',placeholder:'Search cards...',value:search,autoFocus:true,onChange:e=>setSearch(e.target.value)}),
-      React.createElement('div',{className:'clist'},
-        filtered.map(c=>{const taken=takenNames.includes(c.name);
-          return React.createElement('div',{key:c.name,className:`citem${taken?' taken':''}`,onClick:()=>!taken&&onAssign(c)},
-            React.createElement('span',null,c.name),React.createElement('span',{className:'csuit'},c.suit));})
-      ),
-      React.createElement('button',{className:'btn btn-g',onClick:onClose},'Cancel')
-    )
+function LibraryTab({savedCards,onDelete,showToast}){
+  const [filter,setFilter]=useState('All');
+  const filters=['All','Major Arcana',...SUITS];
+  const cards=ALL_CARDS.filter(c=>filter==='All'||c.suit===filter);
+  return e('div',null,
+    e('div',{className:'lib-filters'},filters.map(f=>e('button',{key:f,className:'fchip'+(f===filter?' active':''),onClick:()=>setFilter(f)},f))),
+    e('div',{className:'lgrid'},cards.map(c=>{
+      const s=savedCards[c.name];
+      return e('div',{key:c.name,className:'lcard',title:c.name,onClick:async()=>{if(s&&window.confirm('Remove '+c.name+'?')){await deleteCard(c.name);onDelete(c.name);showToast(c.name+' removed');}}},
+        s?React.createElement(React.Fragment,null,e('img',{src:s.image,alt:c.name}),e('div',{className:'lcard-name'},c.name))
+        :e('div',{className:'lcard-empty'},e('div',{className:'le-icon'},'◌'),e('div',{className:'le-name'},c.name))
+      );
+    }))
   );
 }
 
 function CardOfTheDayTab({savedCards,apiKey}){
-  const uploadedCards=useMemo(()=>Object.entries(savedCards).map(([name,data])=>({name,...data})),[savedCards]);
-  const [card,setCard]=useState(null);
+  const cards=useMemo(()=>Object.entries(savedCards).map(([n,d])=>({name:n,...d})),[savedCards]);
   const [details,setDetails]=useState(null);
   const [loading,setLoading]=useState(false);
-  useEffect(()=>{
-    if(!uploadedCards.length)return;
-    const today=new Date();
-    const seed=today.getFullYear()*10000+((today.getMonth()+1)*100)+today.getDate();
-    const idx=seed%uploadedCards.length;
-    setCard(uploadedCards[idx]);
-    setDetails(null);
-  },[uploadedCards.length]);
+  const card=useMemo(()=>{
+    if(!cards.length)return null;
+    const t=new Date();
+    const seed=t.getFullYear()*10000+(t.getMonth()+1)*100+t.getDate();
+    return cards[seed%cards.length];
+  },[cards.length]);
   useEffect(()=>{
     if(!card||!apiKey)return;
-    setLoading(true);
-    getCardOfTheDay(card.name,apiKey).then(d=>{setDetails(d);setLoading(false);}).catch(e=>{console.error(e);setLoading(false);});
-  },[card&&card.name]);
-  const today=new Date();
-  const dateStr=today.toLocaleDateString('en-IE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  if(!uploadedCards.length)return React.createElement('div',{className:'sph'},
-    React.createElement('div',{className:'sph-icon'},'☽'),
-    React.createElement('h3',null,'No cards in your deck'),
-    React.createElement('p',null,'Add cards via the Library tab to draw a card of the day.')
-  );
-  return React.createElement('div',{className:'cotd-wrap'},
-    React.createElement('div',{className:'cotd-date'},dateStr),
-    card&&React.createElement('div',{className:'cotd-card-row'},
-      React.createElement('div',{className:'cotd-thumb'},React.createElement('img',{src:card.image,alt:card.name})),
-      React.createElement('div',{className:'cotd-header'},
-        React.createElement('div',{className:'cotd-name'},card.name),
-        details&&React.createElement('div',{className:'cotd-meta'},
-          details.zodiac&&React.createElement('span',{className:'cotd-badge'},details.zodiac),
-          details.element&&React.createElement('span',{className:'cotd-badge'},details.element),
-          details.number&&React.createElement('span',{className:'cotd-badge'},'✦ '+details.number)
+    setLoading(true);setDetails(null);
+    getCardOfTheDay(card.name,apiKey).then(d=>{setDetails(d);setLoading(false);}).catch(err=>{console.error(err);setLoading(false);});
+  },[card&&card.name,apiKey]);
+  if(!cards.length)return e('div',{className:'sph'},e('div',{className:'sph-icon'},'☽'),e('h3',null,'No cards yet'),e('p',null,'Add cards to your deck first.'));
+  const today=new Date().toLocaleDateString('en-IE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  return e('div',{className:'cotd-wrap'},
+    e('div',{className:'cotd-date'},today),
+    card&&e('div',{className:'cotd-card-row'},
+      e('div',{className:'cotd-thumb'},e('img',{src:card.image,alt:card.name})),
+      e('div',{className:'cotd-header'},
+        e('div',{className:'cotd-name'},card.name),
+        details&&e('div',{className:'cotd-meta'},
+          details.zodiac&&e('span',{className:'cotd-badge'},details.zodiac),
+          details.element&&e('span',{className:'cotd-badge'},details.element),
+          details.number&&e('span',{className:'cotd-badge'},'✦ '+details.number)
         )
       )
     ),
-    loading&&React.createElement('div',{className:'cotd-loading'},
-      React.createElement('div',{className:'spinner',style:{width:24,height:24,borderWidth:3}}),
-      React.createElement('p',null,'Reading the cards…')
-    ),
-    details&&React.createElement('div',{className:'cotd-sections'},
-      React.createElement('div',{className:'cotd-section'},
-        React.createElement('div',{className:'cotd-section-label'},"Today's Guidance"),
-        React.createElement('div',{className:'cotd-section-text'},details.daily)
-      ),
-      React.createElement('div',{className:'cotd-section'},
-        React.createElement('div',{className:'cotd-section-label'},'Upright'),
-        React.createElement('div',{className:'cotd-section-text'},details.upright)
-      ),
-      React.createElement('div',{className:'cotd-section'},
-        React.createElement('div',{className:'cotd-section-label'},'Reversed'),
-        React.createElement('div',{className:'cotd-section-text'},details.reversed)
-      ),
-      React.createElement('div',{className:'cotd-section'},
-        React.createElement('div',{className:'cotd-section-label'},'Symbols & Imagery'),
-        React.createElement('div',{className:'cotd-section-text'},details.symbols)
-      ),
-      React.createElement('div',{className:'cotd-reflection'},
-        React.createElement('div',{className:'cotd-reflection-label'},'Reflection for today'),
-        React.createElement('div',{className:'cotd-reflection-text'},details.reflection)
-      )
+    loading&&e('div',{className:'cotd-loading'},e('div',{className:'spinner',style:{width:24,height:24,borderWidth:3}}),e('p',null,'Reading the cards…')),
+    details&&e('div',{className:'cotd-sections'},
+      e('div',{className:'cotd-section'},e('div',{className:'cotd-section-label'},"Today's Guidance"),e('div',{className:'cotd-section-text'},details.daily)),
+      e('div',{className:'cotd-section'},e('div',{className:'cotd-section-label'},'Upright'),e('div',{className:'cotd-section-text'},details.upright)),
+      e('div',{className:'cotd-section'},e('div',{className:'cotd-section-label'},'Reversed'),e('div',{className:'cotd-section-text'},details.reversed)),
+      e('div',{className:'cotd-section'},e('div',{className:'cotd-section-label'},'Symbols & Imagery'),e('div',{className:'cotd-section-text'},details.symbols)),
+      e('div',{className:'cotd-reflection'},e('div',{className:'cotd-reflection-label'},'Reflection for today'),e('div',{className:'cotd-reflection-text'},details.reflection))
     )
   );
 }
@@ -498,107 +407,60 @@ function CardDetailsTab({savedCards,apiKey}){
   const [details,setDetails]=useState(null);
   const [loading,setLoading]=useState(false);
   const [search,setSearch]=useState('');
-  const uploadedCards=useMemo(()=>Object.entries(savedCards).map(([name,data])=>({name,...data})),[savedCards]);
-  const filtered=uploadedCards.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()));
-  const selectCard=async(c)=>{
+  const cards=useMemo(()=>Object.entries(savedCards).map(([n,d])=>({name:n,...d})),[savedCards]);
+  const filtered=cards.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()));
+  const pick=async c=>{
     setSelected(c);setDetails(null);setLoading(true);
-    try{const d=await getCardDetails(c.name,apiKey);setDetails(d);}
-    catch(e){console.error(e);}
+    try{setDetails(await getCardDetails(c.name,apiKey));}catch(err){console.error(err);}
     setLoading(false);
   };
-  if(!uploadedCards.length)return React.createElement('div',{className:'sph'},
-    React.createElement('div',{className:'sph-icon'},'☽'),React.createElement('h3',null,'No cards yet'),React.createElement('p',null,'Upload cards first to explore their meanings.')
+  if(!cards.length)return e('div',{className:'sph'},e('div',{className:'sph-icon'},'☽'),e('h3',null,'No cards yet'),e('p',null,'Add cards to your deck first.'));
+  if(!selected)return e('div',{style:{paddingTop:16}},
+    e('div',{className:'sec-title'},'Choose a card to explore'),
+    e('input',{className:'csearch',placeholder:'Search…',value:search,onChange:ev=>setSearch(ev.target.value)}),
+    e('div',{className:'pick-card-list'},filtered.map(c=>
+      e('div',{key:c.name,className:'pick-card-row',onClick:()=>pick(c)},
+        e('div',{className:'pick-card-thumb'},e('img',{src:c.image,alt:c.name})),
+        e('div',null,e('div',{className:'pick-card-row-name'},c.name),e('div',{className:'pick-card-row-suit'},c.suit))
+      )
+    ))
   );
-  if(!selected)return React.createElement('div',{style:{paddingTop:16}},
-    React.createElement('div',{className:'sec-title'},'Choose a card to explore'),
-    React.createElement('input',{className:'csearch',style:{marginBottom:14},placeholder:'Search your cards\u2026',value:search,onChange:e=>setSearch(e.target.value)}),
-    React.createElement('div',{className:'pick-card-list'},
-      filtered.map(c=>React.createElement('div',{key:c.name,className:'pick-card-row',onClick:()=>selectCard(c)},
-        React.createElement('div',{className:'pick-card-thumb'},React.createElement('img',{src:c.image,alt:c.name})),
-        React.createElement('div',null,
-          React.createElement('div',{className:'pick-card-row-name'},c.name),
-          React.createElement('div',{className:'pick-card-row-suit'},c.suit)
-        )
-      ))
-    )
-  );
-  return React.createElement('div',{className:'card-detail-wrap'},
-    React.createElement('div',{className:'card-detail-row'},
-      React.createElement('div',{className:'card-detail-thumb'},React.createElement('img',{src:selected.image,alt:selected.name})),
-      React.createElement('div',null,
-        React.createElement('div',{className:'card-detail-name'},selected.name),
-        details&&React.createElement('div',{className:'card-detail-badges'},
-          details.zodiac&&React.createElement('span',{className:'card-detail-badge'},details.zodiac),
-          details.element&&React.createElement('span',{className:'card-detail-badge'},details.element),
-          details.number&&React.createElement('span',{className:'card-detail-badge'},'\u2756 '+details.number)
+  return e('div',{className:'card-detail-wrap'},
+    e('div',{className:'card-detail-row'},
+      e('div',{className:'card-detail-thumb'},e('img',{src:selected.image,alt:selected.name})),
+      e('div',null,
+        e('div',{className:'card-detail-name'},selected.name),
+        details&&e('div',{className:'card-detail-badges'},
+          details.zodiac&&e('span',{className:'card-detail-badge'},details.zodiac),
+          details.element&&e('span',{className:'card-detail-badge'},details.element),
+          details.number&&e('span',{className:'card-detail-badge'},'✦ '+details.number)
         )
       )
     ),
-    loading&&React.createElement('div',{className:'cotd-loading'},
-      React.createElement('div',{className:'spinner',style:{width:22,height:22,borderWidth:3}}),
-      React.createElement('p',null,'Consulting the cards\u2026')
+    loading&&e('div',{className:'cotd-loading'},e('div',{className:'spinner',style:{width:22,height:22,borderWidth:3}}),e('p',null,'Consulting the cards…')),
+    details&&e('div',{className:'cotd-sections'},
+      e('div',{className:'cotd-section'},e('div',{className:'cotd-section-label'},'Upright'),e('div',{className:'cotd-section-text'},details.upright)),
+      e('div',{className:'cotd-section'},e('div',{className:'cotd-section-label'},'Reversed'),e('div',{className:'cotd-section-text'},details.reversed)),
+      e('div',{className:'cotd-section'},e('div',{className:'cotd-section-label'},'Symbols & Imagery'),e('div',{className:'cotd-section-text'},details.symbols)),
+      e('div',{className:'cotd-reflection'},e('div',{className:'cotd-reflection-label'},'Reflection'),e('div',{className:'cotd-reflection-text'},details.reflection))
     ),
-    details&&React.createElement('div',{className:'cotd-sections'},
-      React.createElement('div',{className:'cotd-section'},
-        React.createElement('div',{className:'cotd-section-label'},'Upright'),
-        React.createElement('div',{className:'cotd-section-text'},details.upright)
-      ),
-      React.createElement('div',{className:'cotd-section'},
-        React.createElement('div',{className:'cotd-section-label'},'Reversed'),
-        React.createElement('div',{className:'cotd-section-text'},details.reversed)
-      ),
-      React.createElement('div',{className:'cotd-section'},
-        React.createElement('div',{className:'cotd-section-label'},'Symbols & Imagery'),
-        React.createElement('div',{className:'cotd-section-text'},details.symbols)
-      ),
-      React.createElement('div',{className:'cotd-reflection'},
-        React.createElement('div',{className:'cotd-reflection-label'},'Reflection'),
-        React.createElement('div',{className:'cotd-reflection-text'},details.reflection)
-      )
-    ),
-    React.createElement('button',{className:'btn btn-g',style:{alignSelf:'flex-start'},onClick:()=>{setSelected(null);setDetails(null);setSearch('');}},'\u2190 Back')
+    e('button',{className:'btn btn-g',style:{marginTop:8},onClick:()=>{setSelected(null);setDetails(null);setSearch('');}},'\u2190 Back')
   );
 }
 
-function SpreadTab({apiKey}){
-  const [spreadImg,setSpreadImg]=useState(null);const [context,setContext]=useState('');
-  const [interpretation,setInterpretation]=useState('');const [loading,setLoading]=useState(false);
-  const [feedback,setFeedback]=useState(null);const fileRef=useRef();
-  const handleFile=async(file)=>{if(!file||!file.type.startsWith('image/'))return;const c=await compressImage(file,900);setSpreadImg(c);setFeedback(null);};
-  const submit=async()=>{if(!spreadImg||!interpretation.trim())return;setLoading(true);try{const fb=await getSpreadFeedback(spreadImg,context,interpretation,apiKey);setFeedback(fb);}catch(e){console.error(e);}setLoading(false);};
-  const reset=()=>{setSpreadImg(null);setContext('');setInterpretation('');setFeedback(null);};
-  return React.createElement('div',{className:'spread-wrap'},
-    !spreadImg&&React.createElement('div',{className:'upload-zone',onDragOver:e=>{e.preventDefault();e.currentTarget.classList.add('drag')},onDragLeave:e=>e.currentTarget.classList.remove('drag'),onDrop:e=>{e.preventDefault();e.currentTarget.classList.remove('drag');handleFile(e.dataTransfer.files[0])}},
-      React.createElement('div',{className:'uicon'},'☽'),React.createElement('div',{className:'umain'},'Upload your spread'),React.createElement('div',{className:'usub'},'A photo of your laid cards'),
-      React.createElement('input',{type:'file',accept:'image/*',ref:fileRef,style:{display:'none'},onChange:e=>{if(e.target.files[0])handleFile(e.target.files[0]);e.target.value=''}}),
-      React.createElement('button',{className:'btn btn-p',onClick:()=>fileRef.current.click()},'Choose Photo')
-    ),
-    spreadImg&&React.createElement(React.Fragment,null,
-      React.createElement('img',{src:spreadImg,className:'spread-img-preview',alt:'Your spread'}),
-      React.createElement('button',{className:'btn btn-g',style:{alignSelf:'flex-start'},onClick:reset},'Change photo'),
-      !feedback&&React.createElement(React.Fragment,null,
-        React.createElement('div',null,
-          React.createElement('div',{className:'sec-title',style:{marginBottom:8}},'Context (optional)'),
-          React.createElement('input',{className:'context-input',placeholder:'What is this reading for? e.g. "career decision", "relationship check-in"…',value:context,onChange:e=>setContext(e.target.value)})
-        ),
-        React.createElement('div',null,
-          React.createElement('div',{className:'sec-title',style:{marginBottom:8}},'Your interpretation'),
-          React.createElement('textarea',{className:'spread-textarea',placeholder:'Share your reading… What do you see? What story do the cards tell together?',value:interpretation,onChange:e=>setInterpretation(e.target.value)})
-        ),
-        React.createElement('button',{className:'btn btn-p',style:{alignSelf:'flex-start'},onClick:submit,disabled:!interpretation.trim()||loading},loading?'Reading the spread…':'Get Reading Feedback')
+function FlashCard({card,isReversed,flipped,onFlip,meaning,loadingMeaning}){
+  return e('div',{className:'fc-card-wrap'},
+    e('div',{className:'fc-card'+(flipped?' flipped':''),onClick:onFlip},
+      e('div',{className:'fc-face fc-front'+(isReversed?' inverted':'')},
+        e('img',{src:card.image,alt:''}),
+        e('div',{className:'fc-orientation'},isReversed?'Reversed':'Upright'),
+        !flipped&&e('div',{className:'fc-tap-hint'},'Tap to reveal')
       ),
-      feedback&&React.createElement(React.Fragment,null,
-        React.createElement('div',{className:'feedback-box'},
-          React.createElement('h4',null,'Spread Reading'),
-          React.createElement('div',{className:'feedback-section'},React.createElement('div',{className:'fb-label'},'Cards identified'),React.createElement('div',{className:'fb-text'},feedback.cards)),
-          React.createElement('div',{className:'feedback-section'},React.createElement('div',{className:'fb-label'},'Full reading'),React.createElement('div',{className:'fb-text'},feedback.reading)),
-          React.createElement('div',{className:'feedback-section'},React.createElement('div',{className:'fb-label'},'Feedback on your read'),React.createElement('div',{className:'fb-text'},feedback.feedback)),
-          React.createElement('div',{className:'feedback-section'},React.createElement('div',{className:'fb-label'},'To explore further'),React.createElement('div',{className:'fb-text'},feedback.deepen))
-        ),
-        React.createElement('div',{style:{display:'flex',gap:10,flexWrap:'wrap'}},
-          React.createElement('button',{className:'btn btn-g',onClick:()=>setFeedback(null)},'Try again'),
-          React.createElement('button',{className:'btn btn-g',onClick:reset},'New spread')
-        )
+      e('div',{className:'fc-face fc-back'},
+        e('div',{className:'fc-back-name'},card.name),
+        e('div',{className:'fc-back-orient'},isReversed?'Reversed':'Upright'),
+        loadingMeaning?e('div',{className:'fc-loading'},e('div',{className:'spinner'}),e('span',null,'Consulting…'))
+        :e('div',{className:'fc-back-meaning'},meaning||'')
       )
     )
   );
@@ -610,100 +472,146 @@ function StudyTab({savedCards,apiKey}){
   const [flipped,setFlipped]=useState(false);const [meaning,setMeaning]=useState('');const [loadingMeaning,setLoadingMeaning]=useState(false);
   const [choices,setChoices]=useState([]);const [loadingChoices,setLoadingChoices]=useState(false);
   const [answered,setAnswered]=useState(null);const [score,setScore]=useState({correct:0,total:0});const [resultMsg,setResultMsg]=useState('');
-  const uploadedCards=useMemo(()=>Object.entries(savedCards).map(([name,data])=>({name,...data})),[savedCards]);
-  const count=uploadedCards.length;
-  function buildQueue(orient){return shuffle(uploadedCards).map(card=>{let rev=false;if(orient==='reversed')rev=true;else if(orient==='mixed')rev=Math.random()<0.5;return{...card,isReversed:rev};});}
-  function startSession(orient){setOrientation(orient);const q=buildQueue(orient);setQueue(q);setIdx(0);setFlipped(false);setMeaning('');setChoices([]);setAnswered(null);setScore({correct:0,total:0});setResultMsg('');setMode('fc');loadChoices(q[0]);}
-  async function loadChoices(cardObj){
+  const uploaded=useMemo(()=>Object.entries(savedCards).map(([n,d])=>({name:n,...d})),[savedCards]);
+  function buildQ(orient){return shuffle(uploaded).map(c=>({...c,isReversed:orient==='reversed'?true:orient==='mixed'?Math.random()<0.5:false}));}
+  function start(orient){const q=buildQ(orient);setOrientation(orient);setQueue(q);setIdx(0);setFlipped(false);setMeaning('');setChoices([]);setAnswered(null);setScore({correct:0,total:0});setResultMsg('');setMode('fc');loadQ(q[0]);}
+  async function loadQ(card){
     setLoadingChoices(true);setChoices([]);
-    const allNames=uploadedCards.map(c=>c.name);
-    try{
-      const {correct,choices}=await getAllChoices(cardObj.name,cardObj.isReversed,allNames,apiKey);
-      setChoices(choices);
-      setMeaning(correct);
-    }catch(e){console.error(e);}
+    try{const {correct,choices}=await getAllChoices(card.name,card.isReversed,uploaded.map(c=>c.name),apiKey);setChoices(choices);setMeaning(correct);}
+    catch(err){console.error(err);}
     setLoadingChoices(false);
   }
-  async function handleFlip(){setFlipped(true);if(!meaning&&!loadingMeaning){setLoadingMeaning(true);try{const m=await getMeanings(queue[idx].name,queue[idx].isReversed,apiKey);setMeaning(m);}catch{}setLoadingMeaning(false);}}
-  function handleAnswer(choice){setAnswered(choice);setScore(s=>({correct:s.correct+(choice.isCorrect?1:0),total:s.total+1}));setResultMsg(choice.isCorrect?'Well read.':'Not quite — flip the card to see the meaning.');if(!flipped&&choice.isCorrect)setFlipped(true);}
-  async function nextCard(){const next=idx+1;if(next>=queue.length){const q=buildQueue(orientation);setQueue(q);setIdx(0);setFlipped(false);setMeaning('');setAnswered(null);setResultMsg('');loadChoices(q[0]);}else{setIdx(next);setFlipped(false);setMeaning('');setAnswered(null);setResultMsg('');loadChoices(queue[next]);}}
-  if(!count)return React.createElement('div',{className:'sph'},React.createElement('div',{className:'sph-icon'},'☽'),React.createElement('h3',null,'Your deck awaits'),React.createElement('p',null,'Upload cards first to begin studying.'));
-  if(!mode)return React.createElement('div',{className:'study-select'},
-    React.createElement('h2',null,'Choose your practice'),
-    React.createElement('div',{className:'mode-cards'},
-      [{orient:'upright',icon:'☀',title:'Upright',desc:'Practice the classic upright meanings of each card.'},{orient:'reversed',icon:'☽',title:'Reversed',desc:'Deepen your knowledge with inverted card meanings.'},{orient:'mixed',icon:'✦',title:'Mixed',desc:'A full reading — upright and reversed cards combined.'}].map(m=>
-        React.createElement('div',{key:m.orient,className:'mode-card',onClick:()=>startSession(m.orient)},React.createElement('div',{className:'mode-icon'},m.icon),React.createElement('h3',null,m.title),React.createElement('p',null,m.desc))
+  async function flip(){setFlipped(true);if(!meaning&&!loadingMeaning){setLoadingMeaning(true);try{setMeaning(await getMeanings(queue[idx].name,queue[idx].isReversed,apiKey));}catch{}setLoadingMeaning(false);}}
+  function answer(c){setAnswered(c);setScore(s=>({correct:s.correct+(c.isCorrect?1:0),total:s.total+1}));setResultMsg(c.isCorrect?'Well read.':'Not quite — flip to see the meaning.');if(!flipped&&c.isCorrect)setFlipped(true);}
+  async function next(){const n=idx+1;if(n>=queue.length){const q=buildQ(orientation);setQueue(q);setIdx(0);setFlipped(false);setMeaning('');setAnswered(null);setResultMsg('');loadQ(q[0]);}else{setIdx(n);setFlipped(false);setMeaning('');setAnswered(null);setResultMsg('');loadQ(queue[n]);}}
+  if(!uploaded.length)return e('div',{className:'sph'},e('div',{className:'sph-icon'},'☽'),e('h3',null,'No cards yet'),e('p',null,'Add cards to your deck first.'));
+  if(!mode)return e('div',{className:'study-select'},
+    e('h2',null,'Choose your practice'),
+    e('div',{className:'mode-cards'},
+      [{o:'upright',icon:'☀',t:'Upright',d:'Practice classic upright meanings.'},{o:'reversed',icon:'☽',t:'Reversed',d:'Deepen knowledge with reversed meanings.'},{o:'mixed',icon:'✦',t:'Mixed',d:'Upright and reversed combined.'}].map(m=>
+        e('div',{key:m.o,className:'mode-card',onClick:()=>start(m.o)},e('div',{className:'mode-icon'},m.icon),e('h3',null,m.t),e('p',null,m.d))
       )
     ),
-    React.createElement('div',{className:'fc-score'},React.createElement('span',null,count),' cards in your deck')
+    e('div',{className:'fc-score'},e('span',null,uploaded.length),' cards in your deck')
   );
-  const current=queue[idx];if(!current)return null;
-  return React.createElement('div',{className:'fc-wrap'},
-    React.createElement('div',{className:'fc-meta'},`Card ${(idx%queue.length)+1} of ${queue.length}`),
-    React.createElement('div',{className:'fc-score'},'Score: ',React.createElement('span',null,score.correct),' / ',React.createElement('span',null,score.total)),
-    React.createElement(FlashCard,{card:current,isReversed:current.isReversed,flipped,onFlip:handleFlip,meaning,loadingMeaning}),
-    loadingChoices?React.createElement('div',{className:'fc-loading'},React.createElement('div',{className:'spinner'}),React.createElement('span',null,'Drawing choices…'))
-    :choices.length>0&&React.createElement('div',{className:'fc-choices'},
-      choices.map((c,i)=>React.createElement('button',{key:i,className:`fc-choice${answered?(c.isCorrect?' correct':c===answered?' wrong':c.isCorrect?' reveal':''):''}`,onClick:()=>!answered&&handleAnswer(c)},c.text))
+  const cur=queue[idx];if(!cur)return null;
+  return e('div',{className:'fc-wrap'},
+    e('div',{className:'fc-meta'},'Card '+(idx%queue.length+1)+' of '+queue.length),
+    e('div',{className:'fc-score'},'Score: ',e('span',null,score.correct),' / ',e('span',null,score.total)),
+    e(FlashCard,{card:cur,isReversed:cur.isReversed,flipped,onFlip:flip,meaning,loadingMeaning}),
+    loadingChoices?e('div',{className:'fc-loading'},e('div',{className:'spinner'}),e('span',null,'Drawing choices…'))
+    :choices.length>0&&e('div',{className:'fc-choices'},
+      choices.map((c,i)=>e('button',{key:i,className:'fc-choice'+(answered?(c.isCorrect?' correct':c===answered?' wrong':c.isCorrect?' reveal':''):''),onClick:()=>!answered&&answer(c)},c.text))
     ),
-    resultMsg&&React.createElement('div',{className:`fc-result ${answered?.isCorrect?'good':'bad'}`},resultMsg),
-    answered&&React.createElement('div',{className:'fc-actions'},
-      React.createElement('button',{className:'btn btn-p',onClick:nextCard},'Next Card'),
-      React.createElement('button',{className:'btn btn-g',onClick:()=>{setMode(null);setOrientation(null);}},'Change Mode')
+    resultMsg&&e('div',{className:'fc-result '+(answered&&answered.isCorrect?'good':'bad')},resultMsg),
+    answered&&e('div',{className:'fc-actions'},
+      e('button',{className:'btn btn-p',onClick:next},'Next Card'),
+      e('button',{className:'btn btn-g',onClick:()=>{setMode(null);setOrientation(null);}},'Change Mode')
+    )
+  );
+}
+
+function SpreadTab({apiKey}){
+  const [img,setImg]=useState(null);const [ctx,setCtx]=useState('');const [interp,setInterp]=useState('');
+  const [loading,setLoading]=useState(false);const [fb,setFb]=useState(null);const fileRef=useRef();
+  const handleFile=async f=>{if(!f||!f.type.startsWith('image/'))return;setImg(await compressImage(f,900));setFb(null);};
+  const submit=async()=>{if(!img||!interp.trim())return;setLoading(true);try{setFb(await getSpreadFeedback(img,ctx,interp,apiKey));}catch(err){console.error(err);}setLoading(false);};
+  return e('div',{className:'spread-wrap'},
+    !img&&e('div',{className:'cotd-loading',style:{border:'1px dashed rgba(107,63,160,.5)',borderRadius:8,padding:32,cursor:'pointer'},onClick:()=>fileRef.current.click()},
+      e('div',{className:'spinner',style:{width:24,height:24,borderWidth:3,display:'none'}}),
+      e('p',{style:{fontFamily:"'Cinzel',serif",fontSize:'.82rem',color:'var(--gold)',letterSpacing:'.08em'}},'Upload your spread'),
+      e('p',{style:{fontSize:'.8rem',color:'var(--text-dim)',fontStyle:'italic'}},'Tap to choose a photo'),
+      e('input',{type:'file',accept:'image/*',ref:fileRef,style:{display:'none'},onChange:ev=>{if(ev.target.files[0])handleFile(ev.target.files[0]);ev.target.value='';}}),
+      e('button',{className:'btn btn-p',onClick:ev=>{ev.stopPropagation();fileRef.current.click();}},'Choose Photo')
+    ),
+    img&&React.createElement(React.Fragment,null,
+      e('img',{src:img,className:'spread-img-preview',alt:'spread'}),
+      e('button',{className:'btn btn-g',style:{alignSelf:'flex-start'},onClick:()=>{setImg(null);setFb(null);}},'Change photo'),
+      !fb&&React.createElement(React.Fragment,null,
+        e('div',null,e('div',{className:'sec-title',style:{marginBottom:8}},'Context (optional)'),e('input',{className:'context-input',placeholder:'What is this reading for?',value:ctx,onChange:ev=>setCtx(ev.target.value)})),
+        e('div',null,e('div',{className:'sec-title',style:{marginBottom:8}},'Your interpretation'),e('textarea',{className:'spread-textarea',placeholder:'Share your reading…',value:interp,onChange:ev=>setInterp(ev.target.value)})),
+        e('button',{className:'btn btn-p',onClick:submit,disabled:!interp.trim()||loading},loading?'Reading the spread…':'Get Reading Feedback')
+      ),
+      fb&&React.createElement(React.Fragment,null,
+        e('div',{className:'feedback-box'},
+          e('h4',null,'Spread Reading'),
+          e('div',{className:'feedback-section'},e('div',{className:'fb-label'},'Cards identified'),e('div',{className:'fb-text'},fb.cards)),
+          e('div',{className:'feedback-section'},e('div',{className:'fb-label'},'Full reading'),e('div',{className:'fb-text'},fb.reading)),
+          e('div',{className:'feedback-section'},e('div',{className:'fb-label'},'Feedback on your read'),e('div',{className:'fb-text'},fb.feedback)),
+          e('div',{className:'feedback-section'},e('div',{className:'fb-label'},'To explore further'),e('div',{className:'fb-text'},fb.deepen))
+        ),
+        e('div',{style:{display:'flex',gap:10}},
+          e('button',{className:'btn btn-g',onClick:()=>setFb(null)},'Try again'),
+          e('button',{className:'btn btn-g',onClick:()=>{setImg(null);setFb(null);setCtx('');setInterp('');}},'New spread')
+        )
+      )
     )
   );
 }
 
 function App(){
-  const [apiKey,setApiKey]=useState(()=>localStorage.getItem(API_KEY_KEY)||null);
+  const [apiKey,setApiKey]=useState(()=>localStorage.getItem(API_KEY)||null);
   const [savedCards,setSavedCards]=useState({});
   const [loading,setLoading]=useState(true);
-  const [tab,setTab]=useState('upload');const [showSettings,setShowSettings]=useState(false);
-  const [toast,setToast]=useState(null);const toastRef=useRef(null);
+  const [loadErr,setLoadErr]=useState(false);
+  const [tab,setTab]=useState('today');
+  const [showSettings,setShowSettings]=useState(false);
+  const [toast,setToast]=useState(null);
+  const toastRef=useRef(null);
 
   useEffect(()=>{
-    loadAllCards().then(cards=>{setSavedCards(cards);setLoading(false);});
+    loadAllCards()
+      .then(cards=>{setSavedCards(cards);setLoading(false);})
+      .catch(err=>{console.error('Load failed:',err);setLoadErr(true);setLoading(false);});
   },[]);
 
   const showToast=msg=>{setToast(msg);clearTimeout(toastRef.current);toastRef.current=setTimeout(()=>setToast(null),3000);};
-  if(!apiKey)return React.createElement(Onboarding,{onSave:k=>setApiKey(k)});
 
-  if(loading)return React.createElement('div',{className:'app'},
-    React.createElement('div',{className:'header'},
-      React.createElement('div',{className:'htitle'},'The Arcane Codex'),
-      React.createElement('div',{className:'hsub'},'Tarot Study Companion')
-    ),
-    React.createElement('div',{className:'loading'},
-      React.createElement('div',{className:'spinner',style:{width:28,height:28,borderWidth:3}}),
-      React.createElement('p',{style:{fontFamily:"'Cinzel','Palatino Linotype',serif",fontSize:'.72rem',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--purple-light)'}},'Loading your deck…')
+  if(!apiKey)return e(Onboarding,{onSave:k=>setApiKey(k)});
+
+  if(loading)return e('div',{className:'app'},
+    e('div',{className:'header'},e('div',{className:'htitle'},'The Arcane Codex'),e('div',{className:'hsub'},'Tarot Study Companion')),
+    e('div',{className:'loading'},e('div',{className:'spinner',style:{width:28,height:28,borderWidth:3}}),e('p',null,'Loading your deck…'))
+  );
+
+  if(loadErr)return e('div',{className:'app'},
+    e('div',{className:'header'},e('div',{className:'htitle'},'The Arcane Codex')),
+    e('div',{className:'sph'},
+      e('div',{className:'sph-icon'},'✕'),
+      e('h3',null,'Could not load your deck'),
+      e('p',null,'Check your internet connection and Firestore rules, then reload.'),
+      e('button',{className:'btn btn-p',style:{marginTop:20},onClick:()=>window.location.reload()},'Reload')
     )
   );
+
   const count=Object.keys(savedCards).length;
-  return React.createElement('div',{className:'app'},
-    React.createElement('div',{className:'header'},
-      React.createElement('div',{className:'htitle'},'The Arcane Codex'),
-      React.createElement('div',{className:'hsub'},'Tarot Study Companion'),
-      React.createElement('button',{className:'hset',onClick:()=>setShowSettings(s=>!s)},'⚙')
+  return e('div',{className:'app'},
+    e('div',{className:'header'},
+      e('div',{className:'htitle'},'The Arcane Codex'),
+      e('div',{className:'hsub'},'Tarot Study Companion'),
+      e('button',{className:'hset',onClick:()=>setShowSettings(s=>!s)},'⚙')
     ),
-    showSettings&&React.createElement(SettingsPanel,{apiKey,onUpdate:k=>{setApiKey(k);showToast('API key updated');},onClose:()=>setShowSettings(false)}),
-    React.createElement('div',{className:'prog-wrap'},
-      React.createElement('div',{className:'prog-lbl'},React.createElement('span',{className:'pt'},'Deck Completion'),React.createElement('span',{className:'pc'},`${count} / 78`)),
-      React.createElement('div',{className:'prog-track'},React.createElement('div',{className:'prog-fill',style:{width:`${(count/78)*100}%`}}))
+    showSettings&&e(SettingsPanel,{apiKey,onUpdate:k=>{setApiKey(k);showToast('API key updated');},onClose:()=>setShowSettings(false)}),
+    e('div',{className:'prog-wrap'},
+      e('div',{className:'prog-lbl'},e('span',{className:'pt'},'Deck Completion'),e('span',{className:'pc'},count+' / 78')),
+      e('div',{className:'prog-track'},e('div',{className:'prog-fill',style:{width:(count/78*100)+'%'}}))
     ),
-    React.createElement('div',{className:'nav'},
-      [['upload','Upload'],['library','Library'],['study','Flashcards'],['interpret','Interpret'],['spread','Spread']].map(([t,l])=>
-        React.createElement('button',{key:t,className:`nbtn${tab===t?' active':''}`,onClick:()=>setTab(t)},l))
+    e('div',{className:'nav'},
+      [['today','Today'],['library','Library'],['study','Flashcards'],['details','Cards'],['spread','Spread']].map(([t,l])=>
+        e('button',{key:t,className:'nbtn'+(tab===t?' active':''),onClick:()=>setTab(t)},l))
     ),
-    tab==='upload'&&React.createElement(UploadTab,{savedCards,apiKey,showToast,onCardSaved:(name,data)=>setSavedCards(prev=>({...prev,[name]:data}))}),
-    tab==='library'&&React.createElement(LibraryTab,{savedCards,showToast,onDelete:name=>setSavedCards(prev=>{const n={...prev};delete n[name];return n;})}),
-    tab==='study'&&React.createElement(StudyTab,{savedCards,apiKey}),
-    tab==='interpret'&&React.createElement(InterpretTab,{savedCards,apiKey}),
-    tab==='spread'&&React.createElement(SpreadTab,{apiKey}),
-    toast&&React.createElement(Toast,{msg:toast})
+    tab==='today'&&e(CardOfTheDayTab,{savedCards,apiKey}),
+    tab==='library'&&e(LibraryTab,{savedCards,showToast,onDelete:n=>setSavedCards(p=>{const c={...p};delete c[n];return c;})}),
+    tab==='study'&&e(StudyTab,{savedCards,apiKey}),
+    tab==='details'&&e(CardDetailsTab,{savedCards,apiKey}),
+    tab==='spread'&&e(SpreadTab,{apiKey}),
+    e(Toast,{msg:toast})
   );
 }
-ReactDOM.render(React.createElement(App),document.getElementById('root'));
-}); // end firebaseReady
+
+const e=React.createElement;
+ReactDOM.render(e(App,null),document.getElementById('root'));
+} // end bootApp
 </script>
 </body>
 </html>
