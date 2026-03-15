@@ -165,11 +165,32 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 15%,rg
 <div id="root"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDU43lAmE8mGLb4BpRVMCF0_IngytjpdSM",
+  authDomain: "tarotstudy.firebaseapp.com",
+  projectId: "tarotstudy",
+  storageBucket: "tarotstudy.firebasestorage.app",
+  messagingSenderId: "897620280064",
+  appId: "1:897620280064:web:7e3945ded122d0093829e5"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
+const COLLECTION = 'cards';
+
+window._db = db;
+window._firestoreOps = { doc, setDoc, getDoc, deleteDoc, collection, getDocs };
+
+window.dispatchEvent(new Event('firebaseReady'));
+</script>
 <script>
-window.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('firebaseReady', function() {
 const {useState,useEffect,useCallback,useRef,useMemo}=React;
 const API_KEY_KEY='tarot-learner-apikey';
-const CARD_PREFIX='tarot-card:';
 const MAJOR=["The Fool","The Magician","The High Priestess","The Empress","The Emperor","The Hierophant","The Lovers","The Chariot","Strength","The Hermit","Wheel of Fortune","Justice","The Hanged Man","Death","Temperance","The Devil","The Tower","The Star","The Moon","The Sun","Judgement","The World"];
 const SUITS=["Wands","Cups","Swords","Pentacles"];
 const RANKS=["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Page","Knight","Queen","King"];
@@ -177,23 +198,30 @@ const ALL_CARDS=[...MAJOR.map(n=>({name:n,suit:"Major Arcana",type:"major"})),..
 
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
 
-// ── localStorage storage (works in any browser, any device) ──
-function loadAllCards(){
+// ── Firestore storage (cross-device, no size limit) ──
+const {doc,setDoc,getDoc,deleteDoc,collection,getDocs}=window._firestoreOps;
+const db=window._db;
+
+async function loadAllCards(){
   try{
-    const keys=Object.keys(localStorage).filter(k=>k.startsWith(CARD_PREFIX));
+    const snap=await getDocs(collection(db,'cards'));
     const cards={};
-    keys.forEach(k=>{
-      try{const v=localStorage.getItem(k);if(v){cards[decodeURIComponent(k.slice(CARD_PREFIX.length))]=JSON.parse(v);}}catch{}
-    });
+    snap.forEach(d=>{cards[d.id.replace(/__dot__/g,'.')]=d.data();});
     return cards;
-  }catch{return{};}
+  }catch(e){console.error('loadAllCards',e);return{};}
 }
-function saveCard(name,data){
-  try{localStorage.setItem(CARD_PREFIX+encodeURIComponent(name),JSON.stringify(data));}catch(e){
-    if(e.name==='QuotaExceededError'){alert('Storage full. Try removing some cards or clearing old data.');}
-  }
+async function saveCard(name,data){
+  try{
+    const id=name.replace(/\./g,'__dot__');
+    await setDoc(doc(db,'cards',id),data);
+  }catch(e){console.error('saveCard',e);alert('Error saving card: '+e.message);}
 }
-function deleteCard(name){try{localStorage.removeItem(CARD_PREFIX+encodeURIComponent(name));}catch{}}
+async function deleteCard(name){
+  try{
+    const id=name.replace(/\./g,'__dot__');
+    await deleteDoc(doc(db,'cards',id));
+  }catch(e){console.error('deleteCard',e);}
+}
 
 function compressImage(file,maxDim=700){
   return new Promise(res=>{
@@ -327,7 +355,7 @@ function UploadTab({savedCards,onCardSaved,showToast,apiKey}){
   },[apiKey]);
   const doSave=async()=>{
     const assigned=pending.filter(p=>p.card);if(!assigned.length)return;setSaving(true);
-    for(const p of assigned){const data={image:p.preview,suit:p.card.suit,type:p.card.type};saveCard(p.card.name,data);onCardSaved(p.card.name,data);}
+    for(const p of assigned){const data={image:p.preview,suit:p.card.suit,type:p.card.type};await saveCard(p.card.name,data);onCardSaved(p.card.name,data);}
     setPending(prev=>prev.filter(p=>!p.card));showToast(`${assigned.length} card${assigned.length>1?'s':''} saved`);setSaving(false);
   };
   const scanning=pending.filter(p=>p.scanning).length,identified=pending.filter(p=>p.card).length,errors=pending.filter(p=>p.scanError).length;
@@ -363,7 +391,7 @@ function LibraryTab({savedCards,onDelete,showToast}){
     React.createElement('div',{className:'lib-filters'},filters.map(f=>React.createElement('button',{key:f,className:`fchip${f===filter?' active':''}`,onClick:()=>setFilter(f)},f))),
     React.createElement('div',{className:'lgrid'},cards.map(c=>{
       const saved=savedCards[c.name];
-      return React.createElement('div',{key:c.name,className:'lcard',title:c.name,onClick:()=>{if(saved&&window.confirm(`Remove ${c.name}?`)){deleteCard(c.name);onDelete(c.name);showToast(`${c.name} removed`);}}},
+      return React.createElement('div',{key:c.name,className:'lcard',title:c.name,onClick:async()=>{if(saved&&window.confirm(`Remove ${c.name}?`)){await deleteCard(c.name);onDelete(c.name);showToast(`${c.name} removed`);}}},
         saved?React.createElement(React.Fragment,null,React.createElement('img',{src:saved.image,alt:c.name}),React.createElement('div',{className:'lcard-name'},c.name))
         :React.createElement('div',{className:'lcard-empty'},React.createElement('div',{className:'le-icon'},'◌'),React.createElement('div',{className:'le-name'},c.name))
       );
@@ -542,13 +570,27 @@ function StudyTab({savedCards,apiKey}){
 function App(){
   const [apiKey,setApiKey]=useState(()=>localStorage.getItem(API_KEY_KEY)||null);
   const [savedCards,setSavedCards]=useState({});
+  const [loading,setLoading]=useState(true);
   const [tab,setTab]=useState('upload');const [showSettings,setShowSettings]=useState(false);
   const [toast,setToast]=useState(null);const toastRef=useRef(null);
 
-  useEffect(()=>{setSavedCards(loadAllCards());},[]);
+  useEffect(()=>{
+    loadAllCards().then(cards=>{setSavedCards(cards);setLoading(false);});
+  },[]);
 
   const showToast=msg=>{setToast(msg);clearTimeout(toastRef.current);toastRef.current=setTimeout(()=>setToast(null),3000);};
   if(!apiKey)return React.createElement(Onboarding,{onSave:k=>setApiKey(k)});
+
+  if(loading)return React.createElement('div',{className:'app'},
+    React.createElement('div',{className:'header'},
+      React.createElement('div',{className:'htitle'},'The Arcane Codex'),
+      React.createElement('div',{className:'hsub'},'Tarot Study Companion')
+    ),
+    React.createElement('div',{className:'loading'},
+      React.createElement('div',{className:'spinner',style:{width:28,height:28,borderWidth:3}}),
+      React.createElement('p',{style:{fontFamily:"'Cinzel','Palatino Linotype',serif",fontSize:'.72rem',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--purple-light)'}},'Loading your deck…')
+    )
+  );
   const count=Object.keys(savedCards).length;
   return React.createElement('div',{className:'app'},
     React.createElement('div',{className:'header'},
@@ -574,7 +616,7 @@ function App(){
   );
 }
 ReactDOM.render(React.createElement(App),document.getElementById('root'));
-}); // end DOMContentLoaded
+}); // end firebaseReady
 </script>
 </body>
 </html>
