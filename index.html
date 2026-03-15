@@ -204,7 +204,7 @@
       border-color: var(--purple-light);
       background: rgba(107,63,160,0.12);
     }
-    .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
     .upload-icon { font-size: 2rem; margin-bottom: 12px; }
     .upload-main {
       font-family: 'Cinzel', serif;
@@ -530,6 +530,34 @@
       to   { opacity: 1; transform: translateX(-50%) translateY(0); }
     }
 
+    /* Scanning state on pending card */
+    .pending-card .scan-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(26,15,36,0.75);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .scan-spinner {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(155,111,212,0.3);
+      border-top-color: var(--purple-light);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .scan-label-text {
+      font-family: 'Cinzel', serif;
+      font-size: 0.55rem;
+      color: var(--purple-light);
+      letter-spacing: 0.1em;
+    }
+    .pending-card.scanning { pointer-events: none; }
+    .pending-card.error { border-color: #c97070; }
+
     /* Hidden utility */
     .hidden { display: none !important; }
 
@@ -597,12 +625,15 @@
   </div>
 
   <!-- Upload Tab -->
+  <!-- Hidden file input, triggered explicitly -->
+  <input type="file" id="file-input" accept="image/*" multiple style="display:none" />
+
   <div id="tab-upload">
     <div class="upload-zone" id="upload-zone">
-      <input type="file" id="file-input" accept="image/*" multiple />
       <div class="upload-icon">✦</div>
       <div class="upload-main">Upload card images</div>
-      <div class="upload-sub">Tap to select or drag and drop — multiple at once</div>
+      <div class="upload-sub">Tap the button below or drag and drop</div>
+      <button class="btn btn-primary" id="upload-btn" style="margin-top:16px">Choose Photos</button>
     </div>
     <div id="pending-section" class="hidden">
       <div class="section-title" id="pending-title"></div>
@@ -736,20 +767,47 @@ function renderPending() {
 
   if (pendingItems.length === 0) { section.classList.add('hidden'); return; }
   section.classList.remove('hidden');
-  title.textContent = `${pendingItems.length} image${pendingItems.length > 1 ? 's' : ''} — tap each to identify`;
+
+  const scanning     = pendingItems.filter(p => p.scanning).length;
+  const identified   = pendingItems.filter(p => p.card).length;
+  const errors       = pendingItems.filter(p => p.scanError).length;
+
+  if (scanning > 0) {
+    title.textContent = `Identifying ${scanning} card${scanning > 1 ? 's' : ''}… tap any to correct`;
+  } else if (errors > 0) {
+    title.textContent = `${identified} identified, ${errors} unrecognised — tap to name manually`;
+  } else {
+    title.textContent = `${identified} card${identified !== 1 ? 's' : ''} identified — tap any to correct`;
+  }
 
   grid.innerHTML = '';
   pendingItems.forEach(item => {
     const card = document.createElement('div');
-    card.className = `pending-card${item.card ? ' assigned' : ''}`;
+    let classes = 'pending-card';
+    if (item.scanning)  classes += ' scanning';
+    if (item.card)      classes += ' assigned';
+    if (item.scanError) classes += ' error';
+    card.className = classes;
     card.dataset.id = item.id;
+
+    let overlay = '';
+    if (item.scanning) {
+      overlay = `<div class="scan-overlay"><div class="scan-spinner"></div><div class="scan-label-text">Scanning</div></div>`;
+    }
+
+    let labelText = 'Tap to name';
+    if (item.scanning)  labelText = '…';
+    if (item.card)      labelText = item.card.name;
+    if (item.scanError) labelText = 'Tap to name';
+
     card.innerHTML = `
       <img src="${item.preview}" alt="" />
-      <div class="pending-card-label">${item.card ? item.card.name : 'Tap to name'}</div>
+      ${overlay}
+      <div class="pending-card-label">${labelText}</div>
       <button class="pending-card-remove" data-remove="${item.id}">✕</button>
     `;
     card.addEventListener('click', e => {
-      if (e.target.dataset.remove) return;
+      if (e.target.dataset.remove || item.scanning) return;
       openAssignModal(item.id);
     });
     card.querySelector('[data-remove]').addEventListener('click', e => {
@@ -872,14 +930,67 @@ function renderStudy() {
   }
 }
 
+// ── Auto-identify card via Claude ──────────────────────────────────────────
+async function identifyCard(base64Image) {
+  // Strip the data URL prefix to get raw base64
+  const base64 = base64Image.split(',')[1];
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({
+      model: 'claude-opus-4-5',
+      max_tokens: 100,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
+          { type: 'text', text: `This is a tarot card. Identify which card it is and respond with ONLY the card name, nothing else. Use standard names like "The Fool", "The High Priestess", "Ace of Wands", "Queen of Cups", "Ten of Swords", etc. If you cannot identify the card respond with exactly: UNKNOWN` }
+        ]
+      }]
+    })
+  });
+
+  if (!response.ok) throw new Error(`API error ${response.status}`);
+  const data = await response.json();
+  const name = data.content?.[0]?.text?.trim();
+  if (!name || name === 'UNKNOWN') return null;
+
+  // Match against our card list (case-insensitive, flexible)
+  const normalised = name.toLowerCase().replace(/[^a-z0-9 ]/g, '');
+  const match = ALL_CARDS.find(c =>
+    c.name.toLowerCase().replace(/[^a-z0-9 ]/g, '') === normalised
+  );
+  return match || null;
+}
+
 // ── File handling ──────────────────────────────────────────────────────────
 async function handleFiles(files) {
   const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+
+  // Add all items immediately so user sees them appear
+  const newItems = [];
   for (const file of imageFiles) {
     const preview = await compressImage(file);
-    pendingItems.push({ id: Math.random().toString(36).slice(2), preview, card: null, fileName: file.name });
+    const item = { id: Math.random().toString(36).slice(2), preview, card: null, fileName: file.name, scanning: true, scanError: false };
+    pendingItems.push(item);
+    newItems.push(item);
   }
   renderPending();
+
+  // Scan each in parallel
+  await Promise.all(newItems.map(async item => {
+    try {
+      const card = await identifyCard(item.preview);
+      item.card = card;
+      item.scanning = false;
+      item.scanError = !card;
+    } catch {
+      item.scanning = false;
+      item.scanError = true;
+    }
+    renderPending();
+  }));
 }
 
 // ── Save cards ─────────────────────────────────────────────────────────────
@@ -970,8 +1081,13 @@ async function init() {
   // Upload zone
   const zone  = document.getElementById('upload-zone');
   const input = document.getElementById('file-input');
+  const uploadBtn = document.getElementById('upload-btn');
 
-  input.addEventListener('change', () => handleFiles(input.files));
+  uploadBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    input.click();
+  });
+  input.addEventListener('change', () => { if (input.files.length) handleFiles(input.files); input.value = ''; });
   zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
   zone.addEventListener('drop', e => {
