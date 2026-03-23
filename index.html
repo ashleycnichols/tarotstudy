@@ -159,9 +159,31 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 15%,rg
 .feedback-section:last-child{margin-bottom:0}
 .fb-label{font-family:'Cinzel','Palatino Linotype',serif;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--purple-light);margin-bottom:6px}
 .fb-text{color:var(--text-dim);font-style:italic;line-height:1.7}
-.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+.sa-wrap{display:flex;flex-direction:column;gap:20px;padding:16px 0;max-width:600px;margin:0 auto}
+.sa-input{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(107,63,160,.35);border-radius:6px;padding:12px 14px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:1rem;line-height:1.6;resize:vertical;min-height:90px;outline:none;transition:border-color .2s}
+.sa-input:focus{border-color:var(--purple-light)}
+.sa-input::placeholder{color:var(--text-dim);font-style:italic}
+.sa-result{display:flex;flex-direction:column;gap:14px}
+.sa-spread-card{background:rgba(36,21,53,.7);border:1px solid rgba(107,63,160,.3);border-radius:8px;padding:18px 20px}
+.sa-spread-name{font-family:'Cinzel Decorative','Palatino Linotype',serif;font-size:1rem;color:var(--gold-light);margin-bottom:8px}
+.sa-spread-desc{font-size:.95rem;color:var(--text-dim);line-height:1.7;margin-bottom:10px}
+.sa-positions{display:flex;flex-direction:column;gap:6px}
+.sa-position{font-size:.88rem;color:var(--text-main);line-height:1.5;padding:6px 10px;background:rgba(107,63,160,.1);border-radius:4px;border-left:2px solid var(--purple-light)}
+.sa-position-num{font-family:'Cinzel','Palatino Linotype',serif;font-size:.62rem;color:var(--purple-light);letter-spacing:.1em;text-transform:uppercase;margin-right:6px}
+/* Upload in settings */
+.upload-settings-zone{border:1px dashed rgba(107,63,160,.4);border-radius:6px;padding:16px;text-align:center;background:rgba(107,63,160,.04);margin-top:8px;cursor:pointer}
+.upload-settings-zone:hover{border-color:var(--purple-light);background:rgba(107,63,160,.08)}
+.pgrid-sm{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:10px}
+.pcard-sm{position:relative;aspect-ratio:2/3;border-radius:4px;overflow:hidden;border:1px solid rgba(201,168,76,.2);cursor:pointer;transition:border-color .2s}
+.pcard-sm:hover{border-color:var(--gold)}
+.pcard-sm.assigned{border-color:var(--maroon)}
+.pcard-sm.scanning{border-color:rgba(155,111,212,.5);pointer-events:none}
+.pcard-sm img{width:100%;height:100%;object-fit:cover;display:block}
+.pcard-sm-lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(26,15,36,.9);font-size:.54rem;font-family:'Cinzel','Palatino Linotype',serif;color:var(--gold-light);padding:3px 4px;text-align:center;line-height:1.3}
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
 .modal{background:var(--bg2);border:1px solid rgba(107,63,160,.45);border-radius:8px;padding:24px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto}
 .modal-title{font-family:'Cinzel','Palatino Linotype',serif;font-size:.76rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.modal-img{width:100%;max-height:180px;object-fit:contain;border-radius:4px;margin-bottom:16px;border:1px solid rgba(201,168,76,.15)}
 .clist{max-height:220px;overflow-y:auto;border:1px solid rgba(107,63,160,.25);border-radius:4px;margin-bottom:14px}
 .citem{padding:8px 12px;cursor:pointer;font-size:.88rem;border-bottom:1px solid rgba(107,63,160,.1);transition:background .15s;display:flex;justify-content:space-between;align-items:center}
 .citem:hover{background:rgba(107,63,160,.15)}
@@ -430,6 +452,11 @@ function SettingsPanel(props){
     ),
     saved&&e('div',{className:'kstatus',style:{marginTop:8}},'✓ Key updated'),
     e('div',{className:'gen-wrap'},
+      e('div',{className:'sec-title',style:{marginBottom:10}},'Upload Cards'),
+      e('p',{style:{fontSize:'.85rem',color:'var(--text-dim)',fontStyle:'italic',marginBottom:10,lineHeight:1.5}},'Add or reassign cards to your deck.'),
+      e(UploadSection,{savedCards:props.savedCards,apiKey:props.apiKey,onCardSaved:props.onCardSaved,showToast:props.showToast})
+    ),
+    e('div',{className:'gen-wrap'},
       e('div',{className:'sec-title',style:{marginBottom:10}},'Card Meanings'),
       e('p',{style:{fontSize:'.85rem',color:'var(--text-dim)',fontStyle:'italic',marginBottom:12,lineHeight:1.5}},
         cardNames.length===0?'No cards uploaded yet.':missingCount===0?'All '+cardNames.length+' cards have saved meanings.':''+missingCount+' of '+cardNames.length+' cards missing meanings.'),
@@ -438,6 +465,143 @@ function SettingsPanel(props){
       Object.keys(props.meanings).length>0&&e('button',{className:'btn btn-g',style:{marginTop:8},onClick:cleanMeanings,disabled:generating},'Clean up formatting'),
       generating&&e('div',null,e('div',{className:'gen-progress'},e('div',{className:'gen-progress-fill',style:{width:genProgress+'%'}})),e('div',{className:'gen-status'},genStatus+' ('+genProgress+'%)')),
       !generating&&genStatus&&e('div',{className:'gen-status ok'},genStatus)
+    )
+  );
+}
+
+function AssignModal(props){
+  var _=useState('');var search=_[0],setSearch=_[1];
+  var takenNames=Object.keys(props.savedCards).filter(function(n){return n!==props.replacingName;});
+  var filtered=ALL_CARDS.filter(function(c){return c.name.toLowerCase().indexOf(search.toLowerCase())>=0;});
+  return e('div',{className:'modal-back',onClick:function(ev){if(ev.target===ev.currentTarget)props.onClose();}},
+    e('div',{className:'modal'},
+      e('div',{className:'modal-title'},'Which card is this?'),
+      e('img',{src:props.preview,className:'modal-img',alt:''}),
+      e('input',{className:'csearch',placeholder:'Search cards...',value:search,autoFocus:true,onChange:function(ev){setSearch(ev.target.value);}}),
+      e('div',{className:'clist'},filtered.map(function(c){
+        var taken=takenNames.indexOf(c.name)>=0;
+        return e('div',{key:c.name,className:'citem'+(taken?' taken':''),onClick:function(){if(!taken)props.onAssign(c);}},
+          e('span',null,c.name),e('span',{className:'csuit'},c.suit));
+      })),
+      e('button',{className:'btn btn-g',onClick:props.onClose},'Cancel')
+    )
+  );
+}
+
+function UploadSection(props){
+  var _=useState([]);var pending=_[0],setPending=_[1];
+  var __=useState(null);var assigning=__[0],setAssigning=__[1];
+  var ___=useState(false);var saving=___[0],setSaving=___[1];
+  var fileRef=useRef();
+
+  function handleFiles(files){
+    var imgs=Array.from(files).filter(function(f){return f.type.match(/^image\//);});
+    imgs.forEach(function(f){
+      compressImage(f,600).then(function(preview){
+        var item={id:Math.random().toString(36).slice(2),preview:preview,card:null,scanning:true,scanError:false};
+        setPending(function(prev){return prev.concat([item]);});
+        identifyCard(preview,props.apiKey).then(function(card){
+          setPending(function(prev){return prev.map(function(p){return p.id===item.id?Object.assign({},p,{card:card,scanning:false,scanError:!card}):p;});});
+        }).catch(function(){
+          setPending(function(prev){return prev.map(function(p){return p.id===item.id?Object.assign({},p,{scanning:false,scanError:true}):p;});});
+        });
+      });
+    });
+  }
+
+  function doSave(){
+    var assigned=pending.filter(function(p){return p.card;});
+    if(!assigned.length)return;
+    setSaving(true);
+    var chain=Promise.resolve();
+    assigned.forEach(function(p){
+      chain=chain.then(function(){
+        var data={image:p.preview,suit:p.card.suit,type:p.card.type};
+        return saveCard(p.card.name,data).then(function(){props.onCardSaved(p.card.name,data);});
+      });
+    });
+    chain.then(function(){
+      setPending(function(prev){return prev.filter(function(p){return!p.card;});});
+      props.showToast(assigned.length+' card'+(assigned.length>1?'s':'')+' saved');
+      setSaving(false);
+    });
+  }
+
+  var identified=pending.filter(function(p){return p.card;}).length;
+  var scanning=pending.filter(function(p){return p.scanning;}).length;
+
+  return e('div',null,
+    e('div',{className:'upload-settings-zone',onClick:function(){fileRef.current.click();}},
+      e('div',{style:{fontFamily:"'Cinzel',serif",fontSize:'.78rem',color:'var(--gold)',letterSpacing:'.08em',marginBottom:4}},'Choose card photos'),
+      e('div',{style:{fontSize:'.76rem',color:'var(--text-dim)',fontStyle:'italic'}},'Tap to select — auto-identifies each card'),
+      e('input',{type:'file',accept:'image/*',multiple:true,ref:fileRef,style:{display:'none'},onChange:function(ev){if(ev.target.files.length)handleFiles(ev.target.files);ev.target.value='';}})
+    ),
+    pending.length>0&&e('div',null,
+      e('div',{className:'pgrid-sm'},pending.map(function(item){
+        return e('div',{key:item.id,className:'pcard-sm'+(item.card?' assigned':'')+(item.scanning?' scanning':'')+(item.scanError?' err':''),
+          onClick:function(){if(!item.scanning)setAssigning(item);}},
+          e('img',{src:item.preview,alt:''}),
+          item.scanning&&e('div',{className:'scan-ov'},e('div',{className:'spinner',style:{width:14,height:14,borderWidth:2}})),
+          e('div',{className:'pcard-sm-lbl'},item.scanning?'…':item.card?item.card.name:'Tap')
+        );
+      })),
+      e('div',{style:{display:'flex',gap:8,marginTop:10}},
+        e('button',{className:'btn btn-p',style:{flex:1},onClick:doSave,disabled:!identified||saving},saving?'Saving…':'Save '+identified+' card'+(identified!==1?'s':'')),
+        e('button',{className:'btn btn-g',onClick:function(){setPending([]);}},scanning?'':'Clear')
+      )
+    ),
+    assigning&&e(AssignModal,{
+      preview:assigning.preview,
+      savedCards:props.savedCards,
+      replacingName:assigning.card?assigning.card.name:null,
+      onAssign:function(c){setPending(function(prev){return prev.map(function(p){return p.id===assigning.id?Object.assign({},p,{card:c,scanError:false}):p;});});setAssigning(null);},
+      onClose:function(){setAssigning(null);}
+    })
+  );
+}
+
+function SpreadAdviceTab(props){
+  var _=useState('');var question=_[0],setQuestion=_[1];
+  var __=useState(null);var advice=__[0],setAdvice=__[1];
+  var ___=useState(false);var loading=___[0],setLoading=___[1];
+  var ____=useState('');var history=____[0],setHistory=____[1];
+
+  function ask(){
+    if(!question.trim())return;
+    setLoading(true);setAdvice(null);
+    var prompt='You are an experienced tarot reader. Someone wants to do a tarot reading with this question or intention:\n\n"'+question+'"\n\nRecommend 2-3 suitable tarot spread structures. For each spread respond in this format separated by |||:\nNAME: [spread name]\nDESC: [2 sentences on why this spread suits this question]\nPOSITIONS: [each position on its own line as "N. Position name: what it reveals", e.g. "1. The situation: what is present now"]\n\nSeparate spreads with ===';
+    callClaude([{role:'user',content:prompt}],props.apiKey,800).then(function(t){
+      var spreads=t.split('===').map(function(s){return s.trim();}).filter(Boolean);
+      var parsed=spreads.map(function(s){
+        var ex=function(lbl){var m=s.match(new RegExp(lbl+':\\s*(.+?)(?=\\n[A-Z]+:|$)','s'));return m?stripMd(m[1].trim()):'';};
+        var posRaw=ex('POSITIONS');
+        var positions=posRaw.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.match(/^\d/);});
+        return{name:ex('NAME'),desc:ex('DESC'),positions:positions};
+      });
+      setAdvice(parsed);
+    }).catch(function(err){console.error(err);}).then(function(){setLoading(false);});
+  }
+
+  return e('div',{className:'sa-wrap'},
+    e('div',{className:'sec-title'},'Spread Advice'),
+    e('textarea',{className:'sa-input',placeholder:'What is your question or intention for this reading?\n\ne.g. "I need clarity on a career decision" or "Understanding the energy around a new relationship"',value:question,onChange:function(ev){setQuestion(ev.target.value);}}),
+    e('button',{className:'btn btn-p',onClick:ask,disabled:!question.trim()||loading},loading?'Consulting…':'Recommend a spread'),
+    loading&&e('div',{className:'cotd-loading'},e('div',{className:'spinner',style:{width:22,height:22,borderWidth:3}}),e('p',null,'Finding the right spread…')),
+    advice&&e('div',{className:'sa-result'},
+      advice.map(function(spread,i){
+        return e('div',{key:i,className:'sa-spread-card'},
+          e('div',{className:'sa-spread-name'},spread.name),
+          e('div',{className:'sa-spread-desc'},spread.desc),
+          spread.positions.length>0&&e('div',{className:'sa-positions'},
+            spread.positions.map(function(pos,j){
+              var match=pos.match(/^(\d+)\.\s*(.+)/);
+              if(match)return e('div',{key:j,className:'sa-position'},e('span',{className:'sa-position-num'},match[1]+'.'),match[2]);
+              return e('div',{key:j,className:'sa-position'},pos);
+            })
+          )
+        );
+      }),
+      e('button',{className:'btn btn-g',style:{marginTop:8},onClick:function(){setAdvice(null);setQuestion('');}},'\u2190 New question')
     )
   );
 }
@@ -677,14 +841,15 @@ function App(){
   var count=Object.keys(savedCards).length;
   return e('div',{className:'app'},
     e('div',{className:'header'},e('div',{className:'htitle'},'The Arcane Codex'),e('div',{className:'hsub'},'Tarot Study Companion'),e('button',{className:'hset',onClick:function(){setShowSettings(function(s){return!s;});}},'⚙')),
-    showSettings&&e(SettingsPanel,{apiKey:apiKey,savedCards:savedCards,meanings:meanings,options:options,onUpdate:function(k){setApiKey(k);showToast('API key updated');},onClose:function(){setShowSettings(false);},onMeaningsUpdated:function(name,d){setMeanings(function(prev){var n=Object.assign({},prev);n[name]=d;return n;});},onOptionsUpdated:function(name,d){setOptions(function(prev){var n=Object.assign({},prev);n[name]=d;return n;});}}),
+    showSettings&&e(SettingsPanel,{apiKey:apiKey,savedCards:savedCards,meanings:meanings,options:options,onUpdate:function(k){setApiKey(k);showToast('API key updated');},onClose:function(){setShowSettings(false);},onCardSaved:function(name,data){setSavedCards(function(prev){var n=Object.assign({},prev);n[name]=data;return n;});},showToast:showToast,onMeaningsUpdated:function(name,d){setMeanings(function(prev){var n=Object.assign({},prev);n[name]=d;return n;});},onOptionsUpdated:function(name,d){setOptions(function(prev){var n=Object.assign({},prev);n[name]=d;return n;});}}),
     e('div',{className:'prog-wrap'},e('div',{className:'prog-lbl'},e('span',{className:'pt'},'Deck Completion'),e('span',{className:'pc'},count+' / 78')),e('div',{className:'prog-track'},e('div',{className:'prog-fill',style:{width:(count/78*100)+'%'}}))),
-    e('div',{className:'nav'},[['today','Today'],['library','Library'],['study','Flashcards'],['details','Cards'],['spread','Spread']].map(function(tl){return e('button',{key:tl[0],className:'nbtn'+(tab===tl[0]?' active':''),onClick:function(){setTab(tl[0]);}},tl[1]);})),
+    e('div',{className:'nav'},[['today','Today'],['library','Library'],['study','Flashcards'],['details','Cards'],['spread','Spread'],['advice','Spreads']].map(function(tl){return e('button',{key:tl[0],className:'nbtn'+(tab===tl[0]?' active':''),onClick:function(){setTab(tl[0]);}},tl[1]);})),
     tab==='today'&&e(CardOfTheDayTab,{savedCards:savedCards,apiKey:apiKey,meanings:meanings}),
     tab==='library'&&e(LibraryTab,{savedCards:savedCards,showToast:showToast,onDelete:function(n){setSavedCards(function(p){var c=Object.assign({},p);delete c[n];return c;});}}),
     tab==='study'&&e(StudyTab,{savedCards:savedCards,apiKey:apiKey,meanings:meanings,options:options}),
     tab==='details'&&e(CardDetailsTab,{savedCards:savedCards,apiKey:apiKey,meanings:meanings}),
     tab==='spread'&&e(SpreadTab,{apiKey:apiKey}),
+    tab==='advice'&&e(SpreadAdviceTab,{apiKey:apiKey}),
     e(Toast,{msg:toast})
   );
 }
