@@ -18,10 +18,20 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 15%,rg
 .hsub{font-family:'Cinzel','Palatino Linotype',serif;font-size:.72rem;color:var(--purple-light);letter-spacing:.25em;text-transform:uppercase;margin-top:8px}
 .hset{position:absolute;top:32px;right:0;background:none;border:1px solid rgba(107,63,160,.3);border-radius:50%;width:32px;height:32px;cursor:pointer;color:var(--text-dim);font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
 .hset:hover{border-color:var(--purple-light);color:var(--gold-light)}
-.nav{display:flex;gap:4px;margin:24px 0;border:1px solid rgba(107,63,160,.3);border-radius:4px;padding:4px;background:rgba(26,15,36,.6)}
-.nbtn{flex:1;padding:9px 6px;background:none;border:none;color:var(--text-dim);font-family:'Cinzel','Palatino Linotype',serif;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
-.nbtn:hover{color:var(--gold-light);background:rgba(107,63,160,.12)}
-.nbtn.active{background:rgba(107,63,160,.2);color:var(--gold-light);border:1px solid rgba(201,168,76,.35)}
+.nav-wrap{position:relative;margin:20px 0 24px}
+.nav-bar{display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(107,63,160,.3);border-radius:4px;padding:6px 10px;background:rgba(26,15,36,.6)}
+.nav-current{font-family:'Cinzel','Palatino Linotype',serif;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-light)}
+.nav-hamburger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:4px;transition:opacity .2s}
+.nav-hamburger:hover{opacity:.7}
+.nav-hamburger span{display:block;width:20px;height:2px;background:var(--purple-light);border-radius:1px;transition:all .2s}
+.nav-hamburger.open span:nth-child(1){transform:rotate(45deg) translate(4px,4px)}
+.nav-hamburger.open span:nth-child(2){opacity:0}
+.nav-hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(4px,-4px)}
+.nav-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1e1030;border:1px solid rgba(107,63,160,.4);border-radius:6px;overflow:hidden;z-index:50;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.nav-item{display:block;width:100%;padding:13px 18px;background:none;border:none;border-bottom:1px solid rgba(107,63,160,.15);color:var(--text-dim);font-family:'Cinzel','Palatino Linotype',serif;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-align:left;transition:all .2s}
+.nav-item:last-child{border-bottom:none}
+.nav-item:hover{background:rgba(107,63,160,.15);color:var(--gold-light)}
+.nav-item.active{background:rgba(107,63,160,.2);color:var(--gold-light);border-left:2px solid var(--gold)}
 .prog-wrap{margin-bottom:24px}
 .prog-lbl{display:flex;justify-content:space-between;margin-bottom:8px}
 .prog-lbl .pt{font-family:'Cinzel','Palatino Linotype',serif;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim)}
@@ -820,6 +830,28 @@ function SpreadTab(props){
   );
 }
 
+function HamburgerNav(props){
+  var _=useState(false);var open=_[0],setOpen=_[1];
+  var current=props.tabs.find(function(t){return t[0]===props.tab;});
+  var label=current?current[1]:'Menu';
+  return e('div',{className:'nav-wrap'},
+    e('div',{className:'nav-bar'},
+      e('span',{className:'nav-current'},label),
+      e('button',{className:'nav-hamburger'+(open?' open':''),onClick:function(){setOpen(function(o){return!o;});},
+        'aria-label':'Menu'},
+        e('span'),e('span'),e('span')
+      )
+    ),
+    open&&e('div',{className:'nav-dropdown'},
+      props.tabs.map(function(tl){
+        return e('button',{key:tl[0],className:'nav-item'+(props.tab===tl[0]?' active':''),
+          onClick:function(){props.onTab(tl[0]);setOpen(false);}
+        },tl[1]);
+      })
+    )
+  );
+}
+
 function App(){
   var _=useState(function(){return localStorage.getItem(API_KEY)||null;});var apiKey=_[0],setApiKey=_[1];
   var __=useState({});var savedCards=__[0],setSavedCards=__[1];
@@ -843,12 +875,12 @@ function App(){
     e('div',{className:'header'},e('div',{className:'htitle'},'The Arcane Codex'),e('div',{className:'hsub'},'Tarot Study Companion'),e('button',{className:'hset',onClick:function(){setShowSettings(function(s){return!s;});}},'⚙')),
     showSettings&&e(SettingsPanel,{apiKey:apiKey,savedCards:savedCards,meanings:meanings,options:options,onUpdate:function(k){setApiKey(k);showToast('API key updated');},onClose:function(){setShowSettings(false);},onCardSaved:function(name,data){setSavedCards(function(prev){var n=Object.assign({},prev);n[name]=data;return n;});},showToast:showToast,onMeaningsUpdated:function(name,d){setMeanings(function(prev){var n=Object.assign({},prev);n[name]=d;return n;});},onOptionsUpdated:function(name,d){setOptions(function(prev){var n=Object.assign({},prev);n[name]=d;return n;});}}),
     e('div',{className:'prog-wrap'},e('div',{className:'prog-lbl'},e('span',{className:'pt'},'Deck Completion'),e('span',{className:'pc'},count+' / 78')),e('div',{className:'prog-track'},e('div',{className:'prog-fill',style:{width:(count/78*100)+'%'}}))),
-    e('div',{className:'nav'},[['today','Today'],['library','Library'],['study','Flashcards'],['details','Cards'],['spread','Spread'],['advice','Spreads']].map(function(tl){return e('button',{key:tl[0],className:'nbtn'+(tab===tl[0]?' active':''),onClick:function(){setTab(tl[0]);}},tl[1]);})),
+    e(HamburgerNav,{tab:tab,onTab:function(t){setTab(t);},tabs:[['today','Today'],['library','Library'],['study','Flashcards'],['details','Cards'],['reading','Reading'],['advice','Spread Guide']]}),
     tab==='today'&&e(CardOfTheDayTab,{savedCards:savedCards,apiKey:apiKey,meanings:meanings}),
     tab==='library'&&e(LibraryTab,{savedCards:savedCards,showToast:showToast,onDelete:function(n){setSavedCards(function(p){var c=Object.assign({},p);delete c[n];return c;});}}),
     tab==='study'&&e(StudyTab,{savedCards:savedCards,apiKey:apiKey,meanings:meanings,options:options}),
     tab==='details'&&e(CardDetailsTab,{savedCards:savedCards,apiKey:apiKey,meanings:meanings}),
-    tab==='spread'&&e(SpreadTab,{apiKey:apiKey}),
+    tab==='reading'&&e(SpreadTab,{apiKey:apiKey}),
     tab==='advice'&&e(SpreadAdviceTab,{apiKey:apiKey}),
     e(Toast,{msg:toast})
   );
