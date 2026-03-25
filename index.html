@@ -292,8 +292,25 @@ function generateWrongOptions(name,rev,allNames,apiKey,correctText){
 }
 
 function cleanOptionText(text,cardName){
-  // Strip card name and markdown from any displayed option
-  return stripMd((text||'').replace(new RegExp(cardName,'gi'),'').trim());
+  var result=stripMd((text||'').trim());
+  // Strip all tarot card names (major arcana + suit cards)
+  ALL_CARDS.forEach(function(c){
+    result=result.replace(new RegExp('\\b'+c.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','gi'),'');
+  });
+  // Also strip common partial names that give it away
+  SUITS.forEach(function(s){
+    result=result.replace(new RegExp('\\b'+s+'\\b','gi'),'');
+  });
+  MAJOR.forEach(function(m){
+    // Strip just the distinctive word e.g. "Fool", "Hermit", "Priestess"
+    var words=m.replace(/^The /,'').split(' ');
+    words.forEach(function(w){
+      if(w.length>4){result=result.replace(new RegExp('\\b'+w+'\\b','gi'),'');}
+    });
+  });
+  // Clean up leftover artifacts
+  result=result.replace(/\s{2,}/g,' ').replace(/^[\s,;.]+|[\s,;.]+$/g,'').trim();
+  return result;
 }
 
 function getAllChoices(name,rev,allNames,apiKey,cachedMeanings,cachedOptions){
