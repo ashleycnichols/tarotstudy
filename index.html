@@ -220,15 +220,17 @@ window._db={
   deleteCard:async(n)=>{await deleteDoc(doc(db,'cards',n.replace(/\./g,'__dot__')));},
   loadAllMeanings:async()=>{const s=await getDocs(collection(db,'meanings'));const m={};s.forEach(d=>{m[d.id.replace(/__dot__/g,'.')]=d.data();});return m;},
   saveMeaning:async(n,v)=>{await setDoc(doc(db,'meanings',n.replace(/\./g,'__dot__')),v);},
+  deleteMeaning:async(n)=>{await deleteDoc(doc(db,'meanings',n.replace(/\./g,'__dot__')));},
   loadAllOptions:async()=>{const s=await getDocs(collection(db,'options'));const m={};s.forEach(d=>{m[d.id.replace(/__dot__/g,'.')]=d.data();});return m;},
-  saveOptions:async(n,v)=>{await setDoc(doc(db,'options',n.replace(/\./g,'__dot__')),v);}
+  saveOptions:async(n,v)=>{await setDoc(doc(db,'options',n.replace(/\./g,'__dot__')),v);},
+  deleteOption:async(n)=>{await deleteDoc(doc(db,'options',n.replace(/\./g,'__dot__')));}
 };
 </script>
 <script>
 function startApp(){
 var R=React,RD=ReactDOM,db=window._db;
 var useState=R.useState,useEffect=R.useEffect,useRef=R.useRef,useMemo=R.useMemo,useCallback=R.useCallback;
-var loadAllCards=db.loadAllCards,saveCard=db.saveCard,deleteCard=db.deleteCard,loadAllMeanings=db.loadAllMeanings,saveMeaning=db.saveMeaning,loadAllOptions=db.loadAllOptions,saveOptions=db.saveOptions;
+var loadAllCards=db.loadAllCards,saveCard=db.saveCard,deleteCard=db.deleteCard,loadAllMeanings=db.loadAllMeanings,saveMeaning=db.saveMeaning,deleteMeaning=db.deleteMeaning,loadAllOptions=db.loadAllOptions,saveOptions=db.saveOptions,deleteOption=db.deleteOption;
 var e=R.createElement;
 var API_KEY='tarot-learner-apikey';
 var MAJOR=["The Fool","The Magician","The High Priestess","The Empress","The Emperor","The Hierophant","The Lovers","The Chariot","Strength","The Hermit","Wheel of Fortune","Justice","The Hanged Man","Death","Temperance","The Devil","The Tower","The Star","The Moon","The Sun","Judgement","The World"];
@@ -276,10 +278,10 @@ function getMeanings(name,rev,apiKey){
 }
 
 function generateWrongOptions(name,rev,allNames,apiKey,correctText){
-  // Generate 6 varied wrong answers to store as a pool
   var pool=shuffle(allNames.filter(function(n){return n!==name;})).slice(0,8).join(', ');
   var orientation=rev?'reversed':'upright';
-  return callClaude([{role:'user',content:'Tarot quiz wrong answers for '+name+' ('+orientation+'). The CORRECT answer is: "'+correctText+'"\n\nWrite 6 plausible but wrong answer options. They should be believable distractors but clearly different from the correct answer. Draw inspiration from these cards: '+pool+'\n\nReturn ONLY 6 options separated by newlines, no numbering, no labels. Match the length and style of the correct answer.'}],apiKey,250).then(function(t){
+  var prompt='Tarot quiz wrong answers for '+name+' ('+orientation+').\nThe correct answer is: "'+correctText+'"\n\nWrite exactly 6 wrong options. Rules:\n- Plain prose only, no asterisks, no bold, no markdown\n- Each option is 1-2 short sentences matching the length and register of the correct answer\n- Plausible but clearly different in meaning\n- Draw from these cards: '+pool+'\n\nReturn ONLY 6 options, one per line, no numbering, no labels, nothing else.';
+  return callClaude([{role:'user',content:prompt}],apiKey,300).then(function(t){
     return t.split('\n').map(function(s){return stripMd(s.trim());}).filter(function(s){return s.length>3;}).slice(0,6);
   });
 }
@@ -452,6 +454,47 @@ function SettingsPanel(props){
     }
     next();
   }
+  function regenerateAll(){
+    if(!window.confirm('This will delete all saved meanings and flashcard options for all cards, then regenerate everything from scratch. This may take several minutes. Continue?'))return;
+    var allNames=Object.keys(props.savedCards);
+    if(!allNames.length){setGenStatus('No cards to regenerate.');return;}
+    setGenerating(true);setGenProgress(0);setGenStatus('Clearing old data…');
+    // Delete all meanings and options first
+    var delPromises=allNames.reduce(function(arr,name){
+      return arr.concat([
+        deleteMeaning(name).catch(function(){}),
+        deleteOption(name).catch(function(){})
+      ]);
+    },[]);
+    Promise.all(delPromises).then(function(){
+      props.onAllCleared();
+      var done=0;
+      function next(){
+        if(done>=allNames.length){setGenerating(false);setGenStatus('Done! All '+done+' cards regenerated.');return;}
+        var name=allNames[done];
+        setGenStatus('Regenerating: '+name+' ('+(done+1)+'/'+allNames.length+')');
+        var pool=allNames;
+        getCardDetails(name,props.apiKey).then(function(d){
+          return saveMeaning(name,d).then(function(){
+            props.onMeaningsUpdated(name,d);
+            var uprightCorrect=d.upright||'';var reversedCorrect=d.reversed||'';
+            function trim(s){if(s.length>100){var i=s.search(/[.!?]/);if(i>20)return s.slice(0,i+1);}return s;}
+            uprightCorrect=trim(uprightCorrect);reversedCorrect=trim(reversedCorrect);
+            return Promise.all([
+              generateWrongOptions(name,false,pool,props.apiKey,uprightCorrect),
+              generateWrongOptions(name,true,pool,props.apiKey,reversedCorrect)
+            ]).then(function(results){
+              var data={upright:results[0],reversed:results[1]};
+              return saveOptions(name,data).then(function(){props.onOptionsUpdated(name,data);});
+            });
+          });
+        }).catch(function(err){console.error('Failed for '+name,err);}).then(function(){
+          done++;setGenProgress(Math.round((done/allNames.length)*100));next();
+        });
+      }
+      next();
+    });
+  }
   return e('div',{className:'set-panel'},
     e('div',{className:'sec-title',style:{marginBottom:10}},'Settings'),
     e('div',{className:'kstatus'},'✓ Active: sk-ant-...'+props.apiKey.slice(-6)),
@@ -470,11 +513,19 @@ function SettingsPanel(props){
       e('div',{className:'sec-title',style:{marginBottom:10}},'Card Meanings'),
       e('p',{style:{fontSize:'.85rem',color:'var(--text-dim)',fontStyle:'italic',marginBottom:12,lineHeight:1.5}},
         cardNames.length===0?'No cards uploaded yet.':missingCount===0?'All '+cardNames.length+' cards have saved meanings.':''+missingCount+' of '+cardNames.length+' cards missing meanings.'),
+      missingCount>0&&!generating&&e('div',{style:{fontSize:'.75rem',color:'#c97070',marginBottom:10,lineHeight:1.6}},
+        'Missing: '+cardNames.filter(function(n){return!props.meanings[n];}).join(', ')
+      ),
       cardNames.length>0&&e('button',{className:'btn btn-p',onClick:generateAll,disabled:generating||missingCount===0},generating?'Generating…':missingCount===0?'All meanings saved ✓':'Generate meanings for all cards'),
       Object.keys(props.meanings).length>0&&e('button',{className:'btn btn-p',style:{marginTop:8},onClick:generateOptions,disabled:generating||Object.keys(props.options||{}).length>=Object.keys(props.meanings).length},generating?'Generating…':Object.keys(props.options||{}).length>=Object.keys(props.meanings).length?'Flashcard options saved ✓':'Generate flashcard options'),
       Object.keys(props.meanings).length>0&&e('button',{className:'btn btn-g',style:{marginTop:8},onClick:cleanMeanings,disabled:generating},'Clean up formatting'),
       generating&&e('div',null,e('div',{className:'gen-progress'},e('div',{className:'gen-progress-fill',style:{width:genProgress+'%'}})),e('div',{className:'gen-status'},genStatus+' ('+genProgress+'%)')),
       !generating&&genStatus&&e('div',{className:'gen-status ok'},genStatus)
+    ),
+    e('div',{className:'gen-wrap',style:{borderTop:'1px solid rgba(139,26,26,.3)',marginTop:4,paddingTop:16}},
+      e('div',{className:'sec-title',style:{marginBottom:8,color:'#c97070'}},'Reset'),
+      e('p',{style:{fontSize:'.82rem',color:'var(--text-dim)',fontStyle:'italic',marginBottom:10,lineHeight:1.5}},'Delete all saved meanings and flashcard options and regenerate everything from scratch. Takes several minutes.'),
+      e('button',{className:'btn',style:{borderColor:'var(--maroon)',color:'#c97070',background:'rgba(139,26,26,.1)'},onClick:regenerateAll,disabled:generating||!Object.keys(props.savedCards).length},'Regenerate all content')
     )
   );
 }
@@ -579,14 +630,14 @@ function SpreadAdviceTab(props){
   function ask(){
     if(!question.trim())return;
     setLoading(true);setAdvice(null);
-    var prompt='You are an experienced tarot reader. Someone wants to do a tarot reading with this question or intention:\n\n"'+question+'"\n\nRecommend 2-3 suitable tarot spread structures. For each spread respond in this format separated by |||:\nNAME: [spread name]\nDESC: [2 sentences on why this spread suits this question]\nPOSITIONS: [each position on its own line as "N. Position name: what it reveals", e.g. "1. The situation: what is present now"]\n\nSeparate spreads with ===';
+    var prompt='You are an experienced tarot reader. Someone wants a tarot reading with this question or intention:\n\n"'+question+'"\n\nRecommend 2-3 suitable tarot spreads. Plain text only — no asterisks, no bold, no markdown.\n\nFor each spread use this exact format separated by |||:\nNAME: [spread name]\nDESC: [2 plain sentences on why this suits the question]\nPOSITIONS: [list each position as "N. Name: what it reveals", one per line]\n\nSeparate spreads with ===';
     callClaude([{role:'user',content:prompt}],props.apiKey,800).then(function(t){
       var spreads=t.split('===').map(function(s){return s.trim();}).filter(Boolean);
       var parsed=spreads.map(function(s){
         var ex=function(lbl){var m=s.match(new RegExp(lbl+':\\s*(.+?)(?=\\n[A-Z]+:|$)','s'));return m?stripMd(m[1].trim()):'';};
         var posRaw=ex('POSITIONS');
-        var positions=posRaw.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.match(/^\d/);});
-        return{name:ex('NAME'),desc:ex('DESC'),positions:positions};
+        var positions=posRaw.split('\n').map(function(l){return stripMd(l.trim());}).filter(function(l){return l.match(/^\d/);});
+        return{name:stripMd(ex('NAME')),desc:stripMd(ex('DESC')),positions:positions};
       });
       setAdvice(parsed);
     }).catch(function(err){console.error(err);}).then(function(){setLoading(false);});
@@ -618,13 +669,49 @@ function SpreadAdviceTab(props){
 
 function LibraryTab(props){
   var _=useState('All');var filter=_[0],setFilter=_[1];
+  var __=useState(null);var selected=__[0],setSelected=__[1];
   var filters=['All','Major Arcana'].concat(SUITS);
   var cards=ALL_CARDS.filter(function(c){return filter==='All'||c.suit===filter;});
+  var details=selected?props.meanings[selected.name]:null;
+
+  if(selected){
+    var s=props.savedCards[selected.name];
+    return e('div',{className:'card-detail-wrap'},
+      e('div',{className:'card-detail-row'},
+        s&&e('div',{className:'card-detail-thumb'},e('img',{src:s.image,alt:selected.name})),
+        e('div',null,
+          e('div',{className:'card-detail-name'},selected.name),
+          e('div',{style:{fontSize:'.78rem',color:'var(--purple-light)',fontStyle:'italic',marginBottom:10}},selected.suit),
+          details&&e('div',{className:'card-detail-badges'},
+            details.zodiac&&e('span',{className:'card-detail-badge'},details.zodiac),
+            details.element&&e('span',{className:'card-detail-badge'},details.element),
+            details.number&&e('span',{className:'card-detail-badge'},'✦ '+details.number)
+          )
+        )
+      ),
+      details&&e('div',{className:'cotd-sections'},
+        e('div',{className:'cotd-section'},e('div',{className:'cotd-section-label'},'Upright'),e('div',{className:'cotd-section-text'},details.upright)),
+        e('div',{className:'cotd-section'},e('div',{className:'cotd-section-label'},'Reversed'),e('div',{className:'cotd-section-text'},details.reversed)),
+        e('div',{className:'cotd-section'},e('div',{className:'cotd-section-label'},'Symbols & Imagery'),e('div',{className:'cotd-section-text'},details.symbols)),
+        e('div',{className:'cotd-reflection'},e('div',{className:'cotd-reflection-label'},'Reflection'),e('div',{className:'cotd-reflection-text'},details.reflection))
+      ),
+      !details&&e('div',{className:'sph',style:{padding:'20px 0'}},e('p',null,'No meanings generated yet. Visit Settings to generate.')),
+      e('div',{style:{display:'flex',gap:10,marginTop:8}},
+        e('button',{className:'btn btn-g',onClick:function(){setSelected(null);}},'← Back'),
+        s&&e('button',{className:'btn btn-g',style:{borderColor:'var(--maroon)',color:'#c97070'},onClick:function(){
+          if(window.confirm('Remove '+selected.name+' from your deck?')){
+            deleteCard(selected.name).then(function(){props.onDelete(selected.name);props.showToast(selected.name+' removed');setSelected(null);});
+          }
+        }},'Remove card')
+      )
+    );
+  }
+
   return e('div',null,
     e('div',{className:'lib-filters'},filters.map(function(f){return e('button',{key:f,className:'fchip'+(f===filter?' active':''),onClick:function(){setFilter(f);}},f);})),
     e('div',{className:'lgrid'},cards.map(function(c){
       var s=props.savedCards[c.name];
-      return e('div',{key:c.name,className:'lcard',title:c.name,onClick:function(){if(s&&window.confirm('Remove '+c.name+'?')){deleteCard(c.name).then(function(){props.onDelete(c.name);props.showToast(c.name+' removed');});}}},
+      return e('div',{key:c.name,className:'lcard',title:c.name,onClick:function(){if(s)setSelected(c);}},
         s?e(R.Fragment,null,e('img',{src:s.image,alt:c.name}),e('div',{className:'lcard-name'},c.name)):e('div',{className:'lcard-empty'},e('div',{className:'le-icon'},'◌'),e('div',{className:'le-name'},c.name))
       );
     }))
@@ -636,22 +723,33 @@ function CardOfTheDayTab(props){
   var _=useState(null);var daily=_[0],setDaily=_[1];
   var __=useState(false);var loading=__[0],setLoading=__[1];
   var ctx=useMemo(function(){return getDailyContext();},[]);
+  var today=new Date();
+  var dateKey='cotd-'+today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
   var card=useMemo(function(){
     if(!uploadedCards.length)return null;
-    var t=new Date();var seed=t.getFullYear()*10000+(t.getMonth()+1)*100+t.getDate();
+    var seed=today.getFullYear()*10000+(today.getMonth()+1)*100+today.getDate();
     return uploadedCards[seed%uploadedCards.length];
   },[uploadedCards.length]);
   useEffect(function(){
     if(!card||!props.apiKey)return;
+    // Check localStorage cache first
+    var cacheKey=dateKey+'-'+card.name;
+    var cached=null;
+    try{cached=localStorage.getItem(cacheKey);}catch(e){}
+    if(cached){setDaily(cached);return;}
+    // Generate and cache
     setDaily(null);setLoading(true);
-    var cached=props.meanings[card.name]||null;
-    getDailyGuidance(card.name,cached,props.apiKey).then(function(d){setDaily(d);}).catch(function(err){console.error(err);}).then(function(){setLoading(false);});
+    var cachedMeaning=props.meanings[card.name]||null;
+    getDailyGuidance(card.name,cachedMeaning,props.apiKey).then(function(d){
+      setDaily(d);
+      try{localStorage.setItem(cacheKey,d);}catch(e){}
+    }).catch(function(err){console.error(err);}).then(function(){setLoading(false);});
   },[card&&card.name]);
   if(!uploadedCards.length)return e('div',{className:'sph'},e('div',{className:'sph-icon'},'☽'),e('h3',null,'No cards yet'),e('p',null,'Add cards to your deck first.'));
   var details=card?props.meanings[card.name]:null;
-  var today=new Date().toLocaleDateString('en-IE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  var todayStr=today.toLocaleDateString('en-IE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   return e('div',{className:'cotd-wrap'},
-    e('div',{className:'cotd-date'},today),
+    e('div',{className:'cotd-date'},todayStr),
     card&&e('div',{className:'cotd-card-row'},
       e('div',{className:'cotd-thumb'},e('img',{src:card.image,alt:card.name})),
       e('div',{className:'cotd-header'},
@@ -873,7 +971,7 @@ function App(){
   var count=Object.keys(savedCards).length;
   return e('div',{className:'app'},
     e('div',{className:'header'},e('div',{className:'htitle'},'The Arcane Codex'),e('div',{className:'hsub'},'Tarot Study Companion'),e('button',{className:'hset',onClick:function(){setShowSettings(function(s){return!s;});}},'⚙')),
-    showSettings&&e(SettingsPanel,{apiKey:apiKey,savedCards:savedCards,meanings:meanings,options:options,onUpdate:function(k){setApiKey(k);showToast('API key updated');},onClose:function(){setShowSettings(false);},onCardSaved:function(name,data){setSavedCards(function(prev){var n=Object.assign({},prev);n[name]=data;return n;});},showToast:showToast,onMeaningsUpdated:function(name,d){setMeanings(function(prev){var n=Object.assign({},prev);n[name]=d;return n;});},onOptionsUpdated:function(name,d){setOptions(function(prev){var n=Object.assign({},prev);n[name]=d;return n;});}}),
+    showSettings&&e(SettingsPanel,{apiKey:apiKey,savedCards:savedCards,meanings:meanings,options:options,onUpdate:function(k){setApiKey(k);showToast('API key updated');},onClose:function(){setShowSettings(false);},onCardSaved:function(name,data){setSavedCards(function(prev){var n=Object.assign({},prev);n[name]=data;return n;});},showToast:showToast,onAllCleared:function(){setMeanings({});setOptions({});},onMeaningsUpdated:function(name,d){setMeanings(function(prev){var n=Object.assign({},prev);n[name]=d;return n;});},onOptionsUpdated:function(name,d){setOptions(function(prev){var n=Object.assign({},prev);n[name]=d;return n;});}}),
     e('div',{className:'prog-wrap'},e('div',{className:'prog-lbl'},e('span',{className:'pt'},'Deck Completion'),e('span',{className:'pc'},count+' / 78')),e('div',{className:'prog-track'},e('div',{className:'prog-fill',style:{width:(count/78*100)+'%'}}))),
     e(HamburgerNav,{tab:tab,onTab:function(t){setTab(t);},tabs:[['today','Today'],['library','Library'],['study','Flashcards'],['details','Cards'],['reading','Reading'],['advice','Spread Guide']]}),
     tab==='today'&&e(CardOfTheDayTab,{savedCards:savedCards,apiKey:apiKey,meanings:meanings}),
