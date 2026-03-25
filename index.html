@@ -169,7 +169,9 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 15%,rg
 .feedback-section:last-child{margin-bottom:0}
 .fb-label{font-family:'Cinzel','Palatino Linotype',serif;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--purple-light);margin-bottom:6px}
 .fb-text{color:var(--text-dim);font-style:italic;line-height:1.7}
-.sa-wrap{display:flex;flex-direction:column;gap:20px;padding:16px 0;max-width:600px;margin:0 auto}
+.sa-diagram{margin:14px 0;overflow-x:auto}
+.sa-diagram svg{display:block;margin:0 auto}
+.sa-read-btn{margin-top:12px}
 .sa-input{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(107,63,160,.35);border-radius:6px;padding:12px 14px;color:var(--text-main);font-family:'EB Garamond',Georgia,serif;font-size:1rem;line-height:1.6;resize:vertical;min-height:90px;outline:none;transition:border-color .2s}
 .sa-input:focus{border-color:var(--purple-light)}
 .sa-input::placeholder{color:var(--text-dim);font-style:italic}
@@ -621,11 +623,61 @@ function UploadSection(props){
   );
 }
 
+function SpreadDiagram(props){
+  var positions=props.positions;
+  var layout=props.layout; // array of {n,col,row,label}
+  if(!layout||!layout.length)return null;
+  var maxCol=Math.max.apply(null,layout.map(function(p){return p.col;}))+1;
+  var maxRow=Math.max.apply(null,layout.map(function(p){return p.row;}))+1;
+  var cw=62,ch=88,gap=10,pad=14;
+  var W=maxCol*(cw+gap)-gap+pad*2;
+  var H=maxRow*(ch+gap)-gap+pad*2;
+  return e('div',{className:'sa-diagram'},
+    React.createElement('svg',{width:W,height:H,viewBox:'0 0 '+W+' '+H,xmlns:'http://www.w3.org/2000/svg'},
+      layout.map(function(p){
+        var x=pad+p.col*(cw+gap);
+        var y=pad+p.row*(ch+gap);
+        var labelParts=p.label.split(':');
+        var posName=labelParts[0]?labelParts[0].trim():'';
+        return React.createElement('g',{key:p.n},
+          React.createElement('rect',{x:x,y:y,width:cw,height:ch,rx:4,fill:'rgba(36,21,53,0.9)',stroke:'rgba(107,63,160,0.5)',strokeWidth:1}),
+          React.createElement('text',{x:x+cw/2,y:y+22,textAnchor:'middle',fill:'#e8c96a',fontSize:14,fontFamily:'Cinzel,serif',fontWeight:'bold'},p.n),
+          React.createElement('text',{x:x+cw/2,y:y+38,textAnchor:'middle',fill:'#c4a8e0',fontSize:7.5,fontFamily:'Cinzel,serif'},
+            posName.length>10?posName.slice(0,10)+'…':posName
+          )
+        );
+      })
+    )
+  );
+}
+
+function parseLayout(positions){
+  // Ask Claude for layout, but also build a sensible default from count
+  var n=positions.length;
+  // Common layouts by count
+  if(n===1)return [{n:1,col:1,row:0,label:positions[0]}];
+  if(n===3)return positions.map(function(p,i){return{n:i+1,col:i,row:0,label:p};});
+  if(n===5)return[
+    {n:1,col:1,row:0,label:positions[0]},{n:2,col:0,row:1,label:positions[1]},
+    {n:3,col:1,row:1,label:positions[2]},{n:4,col:2,row:1,label:positions[3]},
+    {n:5,col:1,row:2,label:positions[4]}
+  ];
+  if(n===7)return positions.map(function(p,i){return{n:i+1,col:i%4,row:Math.floor(i/4),label:p};});
+  if(n===10)return[ // Celtic Cross
+    {n:1,col:2,row:2,label:positions[0]},{n:2,col:2,row:2,label:positions[1]},
+    {n:3,col:2,row:0,label:positions[2]},{n:4,col:2,row:4,label:positions[3]},
+    {n:5,col:0,row:2,label:positions[4]},{n:6,col:4,row:2,label:positions[5]},
+    {n:7,col:6,row:4,label:positions[6]},{n:8,col:6,row:3,label:positions[7]},
+    {n:9,col:6,row:2,label:positions[8]},{n:10,col:6,row:1,label:positions[9]}
+  ];
+  // Default: flow left-to-right, 4 per row
+  return positions.map(function(p,i){return{n:i+1,col:i%4,row:Math.floor(i/4),label:p};});
+}
+
 function SpreadAdviceTab(props){
   var _=useState('');var question=_[0],setQuestion=_[1];
   var __=useState(null);var advice=__[0],setAdvice=__[1];
   var ___=useState(false);var loading=___[0],setLoading=___[1];
-  var ____=useState('');var history=____[0],setHistory=____[1];
 
   function ask(){
     if(!question.trim())return;
@@ -637,14 +689,15 @@ function SpreadAdviceTab(props){
         var ex=function(lbl){var m=s.match(new RegExp(lbl+':\\s*(.+?)(?=\\n[A-Z]+:|$)','s'));return m?stripMd(m[1].trim()):'';};
         var posRaw=ex('POSITIONS');
         var positions=posRaw.split('\n').map(function(l){return stripMd(l.trim());}).filter(function(l){return l.match(/^\d/);});
-        return{name:stripMd(ex('NAME')),desc:stripMd(ex('DESC')),positions:positions};
+        var layout=parseLayout(positions);
+        return{name:stripMd(ex('NAME')),desc:stripMd(ex('DESC')),positions:positions,layout:layout};
       });
       setAdvice(parsed);
     }).catch(function(err){console.error(err);}).then(function(){setLoading(false);});
   }
 
   return e('div',{className:'sa-wrap'},
-    e('div',{className:'sec-title'},'Spread Advice'),
+    e('div',{className:'sec-title'},'Spread Guide'),
     e('textarea',{className:'sa-input',placeholder:'What is your question or intention for this reading?\n\ne.g. "I need clarity on a career decision" or "Understanding the energy around a new relationship"',value:question,onChange:function(ev){setQuestion(ev.target.value);}}),
     e('button',{className:'btn btn-p',onClick:ask,disabled:!question.trim()||loading},loading?'Consulting…':'Recommend a spread'),
     loading&&e('div',{className:'cotd-loading'},e('div',{className:'spinner',style:{width:22,height:22,borderWidth:3}}),e('p',null,'Finding the right spread…')),
@@ -653,12 +706,16 @@ function SpreadAdviceTab(props){
         return e('div',{key:i,className:'sa-spread-card'},
           e('div',{className:'sa-spread-name'},spread.name),
           e('div',{className:'sa-spread-desc'},spread.desc),
+          spread.layout&&spread.layout.length>0&&e(SpreadDiagram,{positions:spread.positions,layout:spread.layout}),
           spread.positions.length>0&&e('div',{className:'sa-positions'},
             spread.positions.map(function(pos,j){
               var match=pos.match(/^(\d+)\.\s*(.+)/);
               if(match)return e('div',{key:j,className:'sa-position'},e('span',{className:'sa-position-num'},match[1]+'.'),match[2]);
               return e('div',{key:j,className:'sa-position'},pos);
             })
+          ),
+          e('button',{className:'btn btn-p sa-read-btn',onClick:function(){props.onReadSpread(spread);}},
+            'Read this spread →'
           )
         );
       }),
@@ -897,12 +954,31 @@ function SpreadTab(props){
   var ____=useState(false);var loading=____[0],setLoading=____[1];
   var _5=useState(null);var fb=_5[0],setFb=_5[1];
   var fileRef=useRef();
+  var spread=props.spread; // optional preloaded spread from Spread Guide
+
   function handleFile(f){if(!f||!f.type.match(/^image\//))return;compressImage(f,900).then(function(c){setImg(c);setFb(null);});}
-  function submit(){if(!img||!interp.trim())return;setLoading(true);getSpreadFeedback(img,ctx,interp,props.apiKey).then(function(r){setFb(r);}).catch(function(err){console.error(err);}).then(function(){setLoading(false);});}
+
+  function submit(){
+    if(!img||!interp.trim())return;
+    setLoading(true);
+    // Build enhanced context including spread positions if available
+    var spreadCtx=ctx;
+    if(spread){
+      spreadCtx=(ctx?ctx+'\n\n':'')+'Spread used: '+spread.name+'\nPositions:\n'+spread.positions.join('\n');
+    }
+    getSpreadFeedback(img,spreadCtx,interp,props.apiKey).then(function(r){setFb(r);}).catch(function(err){console.error(err);}).then(function(){setLoading(false);});
+  }
+
   return e('div',{className:'spread-wrap'},
+    spread&&e('div',{style:{background:'rgba(36,21,53,.6)',border:'1px solid rgba(107,63,160,.3)',borderRadius:8,padding:'12px 16px',marginBottom:8}},
+      e('div',{style:{fontFamily:"'Cinzel',serif",fontSize:'.65rem',letterSpacing:'.15em',textTransform:'uppercase',color:'var(--purple-light)',marginBottom:4}},'Using spread'),
+      e('div',{style:{fontFamily:"'Cinzel Decorative',serif",fontSize:'.95rem',color:'var(--gold-light)',marginBottom:6}},spread.name),
+      e('div',{style:{fontSize:'.8rem',color:'var(--text-dim)',fontStyle:'italic'}},spread.positions.length+' positions'),
+      e('button',{className:'btn btn-g',style:{marginTop:8,fontSize:'.6rem',padding:'5px 10px'},onClick:function(){props.onClearSpread&&props.onClearSpread();}},'Use a different spread')
+    ),
     !img&&e('div',{style:{border:'1px dashed rgba(107,63,160,.5)',borderRadius:8,padding:32,textAlign:'center',cursor:'pointer'},onClick:function(){fileRef.current.click();}},
       e('div',{style:{fontFamily:"'Cinzel',serif",fontSize:'.82rem',color:'var(--gold)',letterSpacing:'.08em',marginBottom:8}},'Upload your spread'),
-      e('div',{style:{fontSize:'.8rem',color:'var(--text-dim)',fontStyle:'italic',marginBottom:16}},'A photo of your laid cards'),
+      e('div',{style:{fontSize:'.8rem',color:'var(--text-dim)',fontStyle:'italic',marginBottom:16}},spread?'Photo of your '+spread.name:'A photo of your laid cards'),
       e('input',{type:'file',accept:'image/*',ref:fileRef,style:{display:'none'},onChange:function(ev){if(ev.target.files[0])handleFile(ev.target.files[0]);ev.target.value='';}}),
       e('button',{className:'btn btn-p',onClick:function(ev){ev.stopPropagation();fileRef.current.click();}},'Choose Photo')
     ),
@@ -910,7 +986,7 @@ function SpreadTab(props){
       e('img',{src:img,className:'spread-img-preview',alt:'spread'}),
       e('button',{className:'btn btn-g',style:{alignSelf:'flex-start'},onClick:function(){setImg(null);setFb(null);}},'Change photo'),
       !fb&&e(R.Fragment,null,
-        e('div',null,e('div',{className:'sec-title',style:{marginBottom:8}},'Context (optional)'),e('input',{className:'context-input',placeholder:'What is this reading for?',value:ctx,onChange:function(ev){setCtx(ev.target.value);}})),
+        !spread&&e('div',null,e('div',{className:'sec-title',style:{marginBottom:8}},'Context (optional)'),e('input',{className:'context-input',placeholder:'What is this reading for?',value:ctx,onChange:function(ev){setCtx(ev.target.value);}})),
         e('div',null,e('div',{className:'sec-title',style:{marginBottom:8}},'Your interpretation'),e('textarea',{className:'spread-textarea',placeholder:'Share your reading…',value:interp,onChange:function(ev){setInterp(ev.target.value);}})),
         e('button',{className:'btn btn-p',onClick:submit,disabled:!interp.trim()||loading},loading?'Reading the spread…':'Get Reading Feedback')
       ),
@@ -960,6 +1036,7 @@ function App(){
   var _6=useState('today');var tab=_6[0],setTab=_6[1];
   var _7=useState(false);var showSettings=_7[0],setShowSettings=_7[1];
   var _8=useState(null);var toast=_8[0],setToast=_8[1];
+  var _9=useState(null);var selectedSpread=_9[0],setSelectedSpread=_9[1];
   var toastRef=useRef(null);
   useEffect(function(){
     Promise.all([loadAllCards(),loadAllMeanings(),loadAllOptions()]).then(function(results){setSavedCards(results[0]);setMeanings(results[1]);setOptions(results[2]);setLoading(false);}).catch(function(err){console.error('Load failed:',err);setLoadErr(true);setLoading(false);});
@@ -973,13 +1050,12 @@ function App(){
     e('div',{className:'header'},e('div',{className:'htitle'},'The Arcane Codex'),e('div',{className:'hsub'},'Tarot Study Companion'),e('button',{className:'hset',onClick:function(){setShowSettings(function(s){return!s;});}},'⚙')),
     showSettings&&e(SettingsPanel,{apiKey:apiKey,savedCards:savedCards,meanings:meanings,options:options,onUpdate:function(k){setApiKey(k);showToast('API key updated');},onClose:function(){setShowSettings(false);},onCardSaved:function(name,data){setSavedCards(function(prev){var n=Object.assign({},prev);n[name]=data;return n;});},showToast:showToast,onAllCleared:function(){setMeanings({});setOptions({});},onMeaningsUpdated:function(name,d){setMeanings(function(prev){var n=Object.assign({},prev);n[name]=d;return n;});},onOptionsUpdated:function(name,d){setOptions(function(prev){var n=Object.assign({},prev);n[name]=d;return n;});}}),
     e('div',{className:'prog-wrap'},e('div',{className:'prog-lbl'},e('span',{className:'pt'},'Deck Completion'),e('span',{className:'pc'},count+' / 78')),e('div',{className:'prog-track'},e('div',{className:'prog-fill',style:{width:(count/78*100)+'%'}}))),
-    e(HamburgerNav,{tab:tab,onTab:function(t){setTab(t);},tabs:[['today','Today'],['library','Library'],['study','Flashcards'],['details','Cards'],['reading','Reading'],['advice','Spread Guide']]}),
+    e(HamburgerNav,{tab:tab,onTab:function(t){setTab(t);},tabs:[['today','Today'],['library','Library'],['study','Flashcards'],['reading','Reading'],['advice','Spread Guide']]}),
     tab==='today'&&e(CardOfTheDayTab,{savedCards:savedCards,apiKey:apiKey,meanings:meanings}),
-    tab==='library'&&e(LibraryTab,{savedCards:savedCards,showToast:showToast,onDelete:function(n){setSavedCards(function(p){var c=Object.assign({},p);delete c[n];return c;});}}),
+    tab==='library'&&e(LibraryTab,{savedCards:savedCards,showToast:showToast,meanings:meanings,onDelete:function(n){setSavedCards(function(p){var c=Object.assign({},p);delete c[n];return c;});}}),
     tab==='study'&&e(StudyTab,{savedCards:savedCards,apiKey:apiKey,meanings:meanings,options:options}),
-    tab==='details'&&e(CardDetailsTab,{savedCards:savedCards,apiKey:apiKey,meanings:meanings}),
-    tab==='reading'&&e(SpreadTab,{apiKey:apiKey}),
-    tab==='advice'&&e(SpreadAdviceTab,{apiKey:apiKey}),
+    tab==='reading'&&e(SpreadTab,{apiKey:apiKey,spread:selectedSpread,onClearSpread:function(){setSelectedSpread(null);}}),
+    tab==='advice'&&e(SpreadAdviceTab,{apiKey:apiKey,onReadSpread:function(spread){setSelectedSpread(spread);setTab('reading');}}),
     e(Toast,{msg:toast})
   );
 }
