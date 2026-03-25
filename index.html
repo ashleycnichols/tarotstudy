@@ -282,10 +282,18 @@ function getMeanings(name,rev,apiKey){
 function generateWrongOptions(name,rev,allNames,apiKey,correctText){
   var pool=shuffle(allNames.filter(function(n){return n!==name;})).slice(0,8).join(', ');
   var orientation=rev?'reversed':'upright';
-  var prompt='Tarot quiz wrong answers for '+name+' ('+orientation+').\nThe correct answer is: "'+correctText+'"\n\nWrite exactly 6 wrong options. Rules:\n- Plain prose only, no asterisks, no bold, no markdown\n- Each option is 1-2 short sentences matching the length and register of the correct answer\n- Plausible but clearly different in meaning\n- Draw from these cards: '+pool+'\n\nReturn ONLY 6 options, one per line, no numbering, no labels, nothing else.';
+  var prompt='Tarot quiz wrong answers. DO NOT mention any card names in your answers.\nThe correct answer describes: "'+correctText+'"\n\nWrite exactly 6 wrong options that could plausibly be tarot meanings but are clearly different from the correct answer. Rules:\n- Plain prose only, no asterisks, no bold, no markdown\n- Do NOT name any tarot card\n- Each option is 1-2 short sentences matching the length of the correct answer\n- Draw thematic inspiration from these cards without naming them: '+pool+'\n\nReturn ONLY 6 options, one per line, no numbering, no labels, nothing else.';
   return callClaude([{role:'user',content:prompt}],apiKey,300).then(function(t){
-    return t.split('\n').map(function(s){return stripMd(s.trim());}).filter(function(s){return s.length>3;}).slice(0,6);
+    var cardNameLower=name.toLowerCase();
+    return t.split('\n').map(function(s){
+      return stripMd(s.trim()).replace(new RegExp(name,'gi'),'').replace(new RegExp(cardNameLower,'gi'),'').trim();
+    }).filter(function(s){return s.length>3;}).slice(0,6);
   });
+}
+
+function cleanOptionText(text,cardName){
+  // Strip card name and markdown from any displayed option
+  return stripMd((text||'').replace(new RegExp(cardName,'gi'),'').trim());
 }
 
 function getAllChoices(name,rev,allNames,apiKey,cachedMeanings,cachedOptions){
@@ -295,30 +303,30 @@ function getAllChoices(name,rev,allNames,apiKey,cachedMeanings,cachedOptions){
     var firstStop=correctText.search(/[.!?]/);
     if(firstStop>20)correctText=correctText.slice(0,firstStop+1);
   }
+  correctText=cleanOptionText(correctText,name);
 
-  // Use stored wrong options pool — pick 3 random from the 6
   var storedOpts=cachedOptions&&cachedOptions[name];
   var wrongPool=storedOpts?(rev?storedOpts.reversed:storedOpts.upright):null;
   if(correctText&&wrongPool&&wrongPool.length>=3){
-    var picked=shuffle(wrongPool).slice(0,3);
+    var picked=shuffle(wrongPool).slice(0,3).map(function(w){return cleanOptionText(w,name);});
     return Promise.resolve({
       correct:correctText,
       choices:shuffle([{text:correctText,isCorrect:true}].concat(picked.map(function(w){return{text:w,isCorrect:false};})))
     });
   }
 
-  // Fallback: generate on the fly if no stored options
+  // Fallback: generate on the fly
   if(correctText){
-    return callClaude([{role:'user',content:'Tarot quiz. Correct answer for '+name+' ('+(rev?'reversed':'upright')+') is: "'+correctText+'"\n\nWrite 3 WRONG options. Plausible but clearly different. Draw from: '+shuffle(allNames.filter(function(n){return n!==name;})).slice(0,6).join(', ')+'\nReturn ONLY 3 options separated by newlines, no labels.'}],apiKey,120).then(function(t){
-      var wrongs=t.split('\n').map(function(s){return stripMd(s.trim());}).filter(function(s){return s.length>3;}).slice(0,3);
+    return callClaude([{role:'user',content:'Tarot quiz. The correct meaning is: "'+correctText+'"\n\nWrite 3 WRONG options. Plausible but clearly different. Do NOT name any tarot card. Return ONLY 3 options separated by newlines, no labels.'}],apiKey,120).then(function(t){
+      var wrongs=t.split('\n').map(function(s){return cleanOptionText(s,name);}).filter(function(s){return s.length>3;}).slice(0,3);
       return{correct:correctText,choices:shuffle([{text:correctText,isCorrect:true}].concat(wrongs.map(function(w){return{text:w,isCorrect:false};})))};
     });
   }
 
   // No cache at all
-  return callClaude([{role:'user',content:'Tarot flashcard for '+name+' ('+(rev?'reversed':'upright')+').\nLine 1: correct key meaning (5-8 words)\nLines 2-4: wrong but plausible options (same length)\nReturn ONLY 4 lines, no labels.'}],apiKey,150).then(function(t){
-    var lines=t.split('\n').map(function(s){return stripMd(s.trim());}).filter(Boolean).slice(0,4);
-    return{correct:lines[0]||name,choices:shuffle([{text:lines[0]||name,isCorrect:true}].concat(lines.slice(1).map(function(w){return{text:w,isCorrect:false};})))};
+  return callClaude([{role:'user',content:'Tarot flashcard.\nLine 1: a key meaning (5-8 words, no card names)\nLines 2-4: wrong but plausible options (same length, no card names)\nReturn ONLY 4 lines, no labels.'}],apiKey,150).then(function(t){
+    var lines=t.split('\n').map(function(s){return cleanOptionText(s,name);}).filter(Boolean).slice(0,4);
+    return{correct:lines[0]||'',choices:shuffle([{text:lines[0]||'',isCorrect:true}].concat(lines.slice(1).map(function(w){return{text:w,isCorrect:false};})))};
   });
 }
 
